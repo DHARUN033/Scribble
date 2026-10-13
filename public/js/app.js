@@ -44,9 +44,7 @@ class ScribbleApp {
 
     // 2. Initialize networking safely
     this.initSocket();
-    this.loadPresets();
     this.checkSupabaseStatus();
-    this.loadWordPacks();
   }
 
   getBackendUrl() {
@@ -357,9 +355,24 @@ class ScribbleApp {
       this.loadGlobalLeaderboard();
     });
 
-    // Save Pack to Supabase
-    document.getElementById('savePackToSupabaseBtn')?.addEventListener('click', () => {
-      this.saveWordPackToSupabase();
+    // Word Selection Mode (Random vs Custom)
+    document.querySelectorAll('input[name="adminWordMode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const isCustom = e.target.value === 'custom';
+        const customSec = document.getElementById('customWordsSection');
+        if (customSec) {
+          customSec.classList.toggle('hidden', !isCustom);
+        }
+      });
+    });
+
+    // Custom words input counter
+    document.getElementById('adminCustomWords')?.addEventListener('input', (e) => {
+      const words = e.target.value.split(/[\n,;]+/).map(w => w.trim()).filter(w => w.length > 1);
+      const help = document.getElementById('wordCountHelp');
+      if (help) {
+        help.textContent = words.length > 0 ? `Custom words entered: ${words.length}` : 'Enter custom words for this game lobby';
+      }
     });
 
     // Copy Invite & QR Code
@@ -412,13 +425,7 @@ class ScribbleApp {
       this.renderAvatarPreview();
     });
 
-    // Word presets links in Host setup
-    document.querySelectorAll('[data-preset]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const key = btn.getAttribute('data-preset');
-        this.loadPresetIntoTextarea(key);
-      });
-    });
+
 
     // Player Join button
     document.getElementById('joinPlayerBtn')?.addEventListener('click', () => {
@@ -546,13 +553,19 @@ class ScribbleApp {
     });
 
     document.getElementById('adminSaveWordsBtn')?.addEventListener('click', () => {
-      const words = document.getElementById('adminLiveWordList')?.value;
+      const words = (document.getElementById('adminLiveWordList')?.value || '').trim();
+      const wordMode = words.length > 0 ? 'custom' : 'random';
       this.socket.emit('admin_update_settings', {
         roomCode: this.roomCode,
         adminKey: this.adminKey,
-        settings: { customWords: words }
+        settings: { 
+          wordMode: wordMode,
+          customWords: words 
+        }
       }, (res) => {
-        if (res?.success) alert('Host custom words updated successfully!');
+        if (res?.success) {
+          alert(wordMode === 'custom' ? 'Custom words updated successfully!' : 'Switched to automatic Random Words!');
+        }
       });
     });
 
@@ -607,29 +620,7 @@ class ScribbleApp {
     }
   }
 
-  async loadPresets() {
-    try {
-      const res = await fetch(this.apiUrl('/api/presets'));
-      const data = await res.json();
-      if (data.success) {
-        this.presets = data.presets;
-        this.loadPresetIntoTextarea('tech'); // Default starter preset
-      }
-    } catch (e) {
-      console.warn('Could not load presets:', e);
-    }
-  }
 
-  loadPresetIntoTextarea(key) {
-    if (!this.presets || !this.presets[key]) return;
-    const words = this.presets[key].join(', ');
-    const textarea = document.getElementById('adminCustomWords');
-    if (textarea) {
-      textarea.value = words;
-      const helper = document.getElementById('wordCountHelp');
-      if (helper) helper.textContent = `Words loaded: ${this.presets[key].length} (${key})`;
-    }
-  }
 
   async checkSupabaseStatus() {
     try {
@@ -668,69 +659,7 @@ class ScribbleApp {
     }
   }
 
-  async loadWordPacks() {
-    try {
-      const res = await fetch(this.apiUrl('/api/wordpacks'));
-      const data = await res.json();
-      if (data.success && data.packs && data.packs.length > 0) {
-        const row = document.getElementById('supabaseWordPacksRow');
-        const select = document.getElementById('supabaseWordPackSelect');
-        if (row && select) {
-          row.classList.remove('hidden');
-          select.innerHTML = '<option value="">-- Choose Cloud Pack --</option>';
-          data.packs.forEach((p, idx) => {
-            const opt = document.createElement('option');
-            opt.value = idx;
-            opt.textContent = `${p.name} (${p.words?.length || 0} words)`;
-            select.appendChild(opt);
-          });
 
-          select.addEventListener('change', () => {
-            const chosen = data.packs[select.value];
-            if (chosen && chosen.words) {
-              const textarea = document.getElementById('adminCustomWords');
-              if (textarea) {
-                textarea.value = chosen.words.join(', ');
-                const helper = document.getElementById('wordCountHelp');
-                if (helper) helper.textContent = `Loaded Cloud Pack: ${chosen.name} (${chosen.words.length} words)`;
-              }
-            }
-          });
-        }
-      }
-    } catch (e) {
-      console.warn('Could not load cloud word packs:', e);
-    }
-  }
-
-  async saveWordPackToSupabase() {
-    const raw = document.getElementById('adminCustomWords')?.value.trim();
-    if (!raw) return alert('Enter some words in the box first!');
-
-    const name = prompt('Enter a name for this Custom Word Pack:');
-    if (!name) return;
-
-    try {
-      const res = await fetch(this.apiUrl('/api/wordpacks'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          words: raw,
-          createdBy: 'Host'
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`✅ Pack "${name}" saved to Supabase successfully!`);
-        this.loadWordPacks();
-      } else {
-        alert('Could not save to Supabase: ' + (data.error || 'Check .env credentials'));
-      }
-    } catch (err) {
-      alert('Error saving pack: ' + err.message);
-    }
-  }
 
   openHallOfFameModal() {
     this.openLobbyResultsModal();
@@ -1005,7 +934,12 @@ class ScribbleApp {
     const rounds = parseInt(document.getElementById('adminRounds')?.value || 3, 10);
     const drawTime = parseInt(document.getElementById('adminDrawTime')?.value || 80, 10);
     const gameMode = document.querySelector('input[name="adminGameMode"]:checked')?.value || 'ffa';
-    const wordsRaw = document.getElementById('adminCustomWords')?.value || '';
+    const wordMode = document.querySelector('input[name="adminWordMode"]:checked')?.value || 'random';
+    const wordsRaw = wordMode === 'custom' ? (document.getElementById('adminCustomWords')?.value || '') : '';
+
+    if (wordMode === 'custom' && !wordsRaw.trim()) {
+      return alert('Please enter your custom words in the box, or select "Random Words (Automatic)".');
+    }
 
     try {
       const res = await fetch(this.apiUrl('/api/rooms/create'), {
@@ -1016,6 +950,7 @@ class ScribbleApp {
             rounds,
             drawTime,
             gameMode,
+            wordMode,
             customWords: wordsRaw
           }
         })

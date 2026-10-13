@@ -34,6 +34,12 @@ export const WORD_PRESETS = {
   ]
 };
 
+// Combined master dictionary for automatic Random Words mode
+export const MASTER_RANDOM_WORDS = [
+  ...WORD_PRESETS.general,
+  ...WORD_PRESETS.tech
+];
+
 export function cleanWordList(wordsInput) {
   if (Array.isArray(wordsInput)) {
     return wordsInput

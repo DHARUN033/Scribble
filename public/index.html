@@ -158,29 +158,26 @@
               </div>
             </div>
 
+            <!-- WORD SOURCE SELECTION: 2 OPTIONS -->
             <div class="form-group">
-              <div class="label-with-actions">
-                <label for="adminCustomWords" class="form-label">Host Custom Word List (Events/Training)</label>
-                <div class="preset-links">
-                  <span>Load Preset:</span>
-                  <button type="button" class="link-btn" data-preset="tech">Tech</button>
-                  <button type="button" class="link-btn" data-preset="general">General</button>
-                  <button type="button" class="link-btn" data-preset="office_fun">Office</button>
-                </div>
-              </div>
-              <textarea id="adminCustomWords" class="form-textarea" rows="4" placeholder="Enter words separated by commas or line breaks (e.g. Docker, Python, Microservice, Cloud, Kubernetes)"></textarea>
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
-                <div class="field-help" id="wordCountHelp">Words loaded: 0</div>
-                <button type="button" id="savePackToSupabaseBtn" class="link-btn" style="color:var(--accent-emerald);">💾 Save Pack to Supabase</button>
+              <label class="form-label">Word Selection</label>
+              <div class="team-selector-row">
+                <label class="team-radio">
+                  <input type="radio" name="adminWordMode" value="random" checked>
+                  <span class="team-badge">🎲 Random Words (Automatic)</span>
+                </label>
+                <label class="team-radio">
+                  <input type="radio" name="adminWordMode" value="custom">
+                  <span class="team-badge badge-blue">✍️ Custom Word List (Admin Enters Words)</span>
+                </label>
               </div>
             </div>
 
-            <!-- Supabase Cloud Word Packs Selector -->
-            <div id="supabaseWordPacksRow" class="form-group hidden">
-              <label class="form-label">☁️ Supabase Cloud Word Packs</label>
-              <select id="supabaseWordPackSelect" class="form-input">
-                <option value="">-- Choose Cloud Pack --</option>
-              </select>
+            <!-- Custom Words Input (shown only when Custom Word List is selected) -->
+            <div id="customWordsSection" class="form-group hidden">
+              <label for="adminCustomWords" class="form-label">Admin Custom Word List</label>
+              <textarea id="adminCustomWords" class="form-textarea" rows="4" placeholder="Enter custom words separated by commas or line breaks (e.g. Pizza, Guitar, Astronaut, Castle, Bicycle)"></textarea>
+              <div class="field-help" id="wordCountHelp">Enter custom words for this game lobby</div>
             </div>
 
             <button id="createRoomBtn" class="btn-primary btn-large full-width">👑 CREATE ROOM & OPEN ADMIN CONTROLS</button>
@@ -454,11 +451,11 @@
 
             <hr class="admin-divider">
 
-            <h3>📝 Host Custom Words (Live Update)</h3>
-            <p class="section-desc">You can edit the word pool even during an active match.</p>
-            <textarea id="adminLiveWordList" class="form-textarea" rows="4"></textarea>
+            <h3>📝 Word Pool (Live Update)</h3>
+            <p class="section-desc">Leave empty for automatic Random Words, or enter custom words (comma-separated):</p>
+            <textarea id="adminLiveWordList" class="form-textarea" rows="4" placeholder="Leave empty for Random Words, or type custom words..."></textarea>
             <div class="admin-button-row">
-              <button id="adminSaveWordsBtn" class="btn-subtle">💾 Save Custom Words</button>
+              <button id="adminSaveWordsBtn" class="btn-subtle">💾 Update Word List</button>
               <button id="adminOpenArenaLinkBtn" class="btn-subtle">📺 Open Arena Display in New Tab</button>
             </div>
 

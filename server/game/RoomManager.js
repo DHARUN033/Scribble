@@ -39,6 +39,7 @@ export class RoomManager {
     if (customSettings.rounds) room.settings.rounds = customSettings.rounds;
     if (customSettings.drawTime) room.settings.drawTime = customSettings.drawTime;
     if (customSettings.gameMode) room.settings.gameMode = customSettings.gameMode;
+    if (customSettings.wordMode) room.settings.wordMode = customSettings.wordMode;
     if (customSettings.customWords) {
       const cleaned = cleanWordList(customSettings.customWords);
       if (cleaned.length > 0) {

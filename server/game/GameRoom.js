@@ -1,4 +1,4 @@
-import { WORD_PRESETS, cleanWordList } from './words.js';
+import { WORD_PRESETS, MASTER_RANDOM_WORDS, cleanWordList } from './words.js';
 import { db } from '../db/supabase.js';
 
 function levenshtein(a, b) {
@@ -36,8 +36,8 @@ export class GameRoom {
       drawTime: 80,
       hintCount: 2,
       gameMode: 'ffa', // 'ffa' or 'team'
-      customWordsOnly: true,
-      customWords: [...WORD_PRESETS.tech] // Host custom word list, pre-filled with tech preset as starter
+      wordMode: 'random', // 'random' (automatic) or 'custom' (admin entered)
+      customWords: []
     };
 
     this.state = 'LOBBY'; // LOBBY, STARTING, SELECTING_WORD, DRAWING, ROUND_END, GAME_OVER, PAUSED
@@ -278,8 +278,8 @@ export class GameRoom {
       return { success: false, error: 'Need at least 1 player to start the game' };
     }
 
-    if (!this.settings.customWords || this.settings.customWords.length === 0) {
-      return { success: false, error: 'Host custom word list is empty. Add words first!' };
+    if (this.settings.wordMode === 'custom' && (!this.settings.customWords || this.settings.customWords.length === 0)) {
+      return { success: false, error: 'Custom word mode selected, but no words were entered. Please enter words or switch to Random mode!' };
     }
 
     // Reset scores & streaks
@@ -384,26 +384,41 @@ export class GameRoom {
   }
 
   pickTwoWords() {
-    let customList = cleanWordList(this.settings.customWords);
-    if (customList.length === 0) {
-      customList = [...WORD_PRESETS.tech];
+    let sourcePool = [];
+    const isCustomMode = this.settings.wordMode === 'custom';
+    const customList = cleanWordList(this.settings.customWords);
+
+    if (isCustomMode && customList.length > 0) {
+      // Filter out words that were already picked in this lobby
+      sourcePool = customList.filter(w => !this.usedWords.has(w.toLowerCase().trim()));
+
+      // If fewer than 2 unused custom words remain, fill remaining slots with unused master random words
+      // NEVER reuse words that have already been picked in this.usedWords!
+      if (sourcePool.length < 2) {
+        const fallback = MASTER_RANDOM_WORDS.filter(w => 
+          !this.usedWords.has(w.toLowerCase().trim()) &&
+          !sourcePool.some(sw => sw.toLowerCase().trim() === w.toLowerCase().trim())
+        );
+        sourcePool = [...sourcePool, ...fallback];
+      }
+    } else {
+      // Random mode: choose automatically from master words that haven't been picked yet
+      sourcePool = MASTER_RANDOM_WORDS.filter(w => !this.usedWords.has(w.toLowerCase().trim()));
     }
 
-    // Filter out already used words
-    let pool = customList.filter(w => !this.usedWords.has(w.toLowerCase().trim()));
+    // Shuffle available unused words
+    const shuffled = [...sourcePool].sort(() => 0.5 - Math.random());
 
-    // If remaining unused words in custom list are fewer than 2, recycle
-    if (pool.length < 2) {
-      this.usedWords.clear();
-      pool = [...customList];
+    // Pick top 2 distinct unused words
+    const choices = [];
+    for (const w of shuffled) {
+      if (!choices.some(c => c.toLowerCase().trim() === w.toLowerCase().trim())) {
+        choices.push(w);
+      }
+      if (choices.length === 2) break;
     }
 
-    if (pool.length < 2) {
-      pool = [...pool, ...WORD_PRESETS.tech];
-    }
-
-    const shuffled = pool.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 2);
+    return choices;
   }
 
   startSelectionTimer() {
@@ -431,8 +446,8 @@ export class GameRoom {
     if (this.currentDrawerId !== socketId || this.state !== 'SELECTING_WORD') return;
 
     this.currentWord = word.trim();
-    // Add to used words so it will not repeat
-    this.usedWords.add(this.currentWord.toLowerCase());
+    // Add to used words so it will NEVER appear again in this lobby!
+    this.usedWords.add(this.currentWord.toLowerCase().trim());
 
     this.canvasStrokes = [];
     this.io.to(this.code).emit('canvas_clear');
@@ -853,11 +868,9 @@ export class GameRoom {
     if (newSettings.rounds) this.settings.rounds = Math.max(1, Math.min(10, parseInt(newSettings.rounds)));
     if (newSettings.drawTime) this.settings.drawTime = Math.max(30, Math.min(180, parseInt(newSettings.drawTime)));
     if (newSettings.gameMode) this.settings.gameMode = newSettings.gameMode;
-    if (newSettings.customWords) {
-      const cleaned = cleanWordList(newSettings.customWords);
-      if (cleaned.length > 0) {
-        this.settings.customWords = cleaned;
-      }
+    if (newSettings.wordMode) this.settings.wordMode = newSettings.wordMode;
+    if (newSettings.customWords !== undefined) {
+      this.settings.customWords = cleanWordList(newSettings.customWords);
     }
     if (typeof newSettings.revealWordToAdmin === 'boolean') {
       this.settings.revealWordToAdmin = newSettings.revealWordToAdmin;
