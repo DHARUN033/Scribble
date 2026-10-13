@@ -451,15 +451,6 @@ class ScribbleApp {
       this.sendChatMessage();
     });
 
-    // Powerup Hint Button
-    document.getElementById('powerupHintBtn')?.addEventListener('click', () => {
-      this.socket.emit('trigger_powerup', {
-        roomCode: this.roomCode,
-        powerup: 'hint'
-      });
-      soundEngine.playCue('hint_reveal');
-    });
-
     // Round End Scoreboard Close Button
     document.getElementById('roundEndCloseBtn')?.addEventListener('click', () => {
       if (this.roundEndTimeout) clearTimeout(this.roundEndTimeout);

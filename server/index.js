@@ -160,10 +160,7 @@ io.on('connection', (socket) => {
     const room = roomManager.getRoom(roomCode);
     if (!room || room.state !== 'DRAWING') return;
 
-    if (powerup === 'hint' && socket.id !== room.currentDrawerId) {
-      // Player triggered hint powerup for themselves
-      room.revealRandomHint();
-    } else if (powerup === 'bomb' && socket.id === room.currentDrawerId) {
+    if (powerup === 'bomb' && socket.id === room.currentDrawerId) {
       // Drawer bomb erased canvas
       room.clearCanvas();
       io.to(roomCode).emit('remote_stroke', { type: 'bomb' });

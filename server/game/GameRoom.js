@@ -463,13 +463,6 @@ export class GameRoom {
       this.timeLeft--;
       this.io.to(this.code).emit('timer_tick', { timeLeft: this.timeLeft, state: this.state });
 
-      // Dynamic hint reveals
-      if (this.timeLeft === halfTime) {
-        this.revealRandomHint();
-      } else if (this.timeLeft === quarterTime) {
-        this.revealRandomHint();
-      }
-
       // Audio cue for last 10 seconds
       if (this.timeLeft <= 10 && this.timeLeft > 0) {
         this.io.to(this.code).emit('audio_cue', { sound: 'tick_urgent' });
