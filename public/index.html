@@ -77,17 +77,25 @@
           <h2 class="tab-title">Enter the Arena</h2>
           <div class="lobby-form-grid">
             <div class="avatar-builder-section">
-              <label class="form-label">Customize Avatar</label>
+              <div class="avatar-header-row">
+                <label class="form-label mb-0">Customize Avatar</label>
+                <span class="qbit-pill">Qbit v2</span>
+              </div>
               <div class="avatar-preview-box" id="avatarPreviewContainer">
                 <!-- Injected via Avatar JS -->
               </div>
-              <div class="avatar-controls-row">
-                <button type="button" class="btn-sm btn-subtle" id="prevColorBtn">🎨 Color</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextEyeBtn">👀 Eyes</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextMouthBtn">👄 Mouth</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextAccBtn">👑 Hat</button>
+              <div class="avatar-controls-grid">
+                <button type="button" class="btn-sm btn-subtle" id="prevColorBtn" title="Body Color">🎨 Skin</button>
+                <button type="button" class="btn-sm btn-subtle" id="nextHairBtn" title="Hairstyle">💇 Hair</button>
+                <button type="button" class="btn-sm btn-subtle" id="nextAccBtn" title="Hat / Headwear">🧢 Hat</button>
+                <button type="button" class="btn-sm btn-subtle" id="nextOutfitBtn" title="Clothes / Outfit">👕 Outfit</button>
+                <button type="button" class="btn-sm btn-subtle" id="nextEyeBtn" title="Eyes">👀 Eyes</button>
+                <button type="button" class="btn-sm btn-subtle" id="nextMouthBtn" title="Mouth">👄 Mouth</button>
+                <button type="button" class="btn-sm btn-subtle" id="nextNeckBtn" title="Neck Accessory">🧣 Scarf</button>
+                <button type="button" class="btn-sm btn-subtle" id="nextBackpackBtn" title="Backpack Gear">🎒 Pack</button>
               </div>
-              <button type="button" class="btn-sm btn-secondary full-width" id="randomAvatarBtn">🎲 Randomize</button>
+              <button type="button" class="btn-primary studio-open-btn full-width" id="openAvatarStudioBtn">✨ Open Wayground Studio</button>
+              <button type="button" class="btn-sm btn-subtle full-width" id="randomAvatarBtn">🎲 Quick Randomize</button>
             </div>
 
             <div class="player-info-section">
@@ -788,7 +796,59 @@ SUPABASE_ANON_KEY=eyJhbGciOi...</pre>
     </div>
   </div>
 
+  <!-- WAYGROUND CHARACTER STUDIO MODAL -->
+  <div id="avatarStudioModal" class="modal-overlay hidden">
+    <div class="wayground-studio-container glass-panel">
+      <!-- Studio Header -->
+      <div class="wayground-studio-header">
+        <div class="studio-header-left">
+          <span class="studio-brand-badge">⚡ WAYGROUND STUDIO</span>
+          <h3 class="studio-category-title" id="studioCategoryTitle">Clothes <span class="studio-item-count" id="studioItemCount">(8 items)</span></h3>
+        </div>
+        <div class="studio-header-right">
+          <button id="studioHeroPresetBtn" class="btn-sm btn-subtle" title="Load Wayground Hero Preset">⭐ Hero Preset</button>
+          <button id="studioRandomBtn" class="btn-sm btn-subtle">🎲 Randomize</button>
+          <button id="studioSaveBtn" class="btn-sm btn-primary">💾 Equip & Save</button>
+          <button id="closeAvatarStudioBtn" class="btn-icon studio-close-btn" aria-label="Close Studio">✕</button>
+        </div>
+      </div>
+
+      <!-- Studio Body: Sidebar + Items Panel + Stage -->
+      <div class="wayground-studio-body">
+        <!-- Sidebar Navigation (Matching Wayground Image 2) -->
+        <nav class="wayground-sidebar" id="studioCategoryNav">
+          <!-- Populated dynamically via JS: Face, Hair, Headwear, Clothes, Accessories, Backpack, Skin -->
+        </nav>
+
+        <!-- Center Selection Panel -->
+        <div class="wayground-items-panel">
+          <div class="wayground-items-header">
+            <span class="items-helper-text" id="studioCategoryDesc">Select an item to customize your Qbit</span>
+          </div>
+          <div class="wayground-items-grid" id="studioItemsGrid">
+            <!-- Dynamically populated item cards with live previews/icons -->
+          </div>
+        </div>
+
+        <!-- Right Character Stage (Matching Image 2 sci-fi hangar spotlight stage) -->
+        <div class="wayground-stage-panel">
+          <div class="stage-tag">MY QBIT</div>
+          <div class="stage-spotlight"></div>
+          <div class="stage-avatar-display" id="studioStageAvatar">
+            <!-- Rendered Qbit Avatar -->
+          </div>
+          <div class="stage-pedestal"></div>
+
+          <div class="stage-quick-actions">
+            <button id="stageRandomBtn" class="btn-sm btn-subtle" title="Randomize Look">🎲 Randomize</button>
+            <button id="stageResetBtn" class="btn-sm btn-subtle" title="Default Look">🔄 Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Client Application Modules -->
-  <script type="module" src="/js/app.js?v=4"></script>
+  <script type="module" src="/js/app.js?v=5"></script>
 </body>
 </html>

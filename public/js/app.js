@@ -1,6 +1,13 @@
 // Scribble Arena Master Client Controller
 import { soundEngine } from './audio.js';
-import { AVATAR_OPTIONS, getRandomAvatar, renderAvatarSvg } from './avatar.js';
+import { 
+  AVATAR_OPTIONS, 
+  AVATAR_CATEGORIES, 
+  AVATAR_ITEM_DETAILS, 
+  getRandomAvatar, 
+  getWaygroundHeroAvatar, 
+  renderAvatarSvg 
+} from './avatar.js';
 import { DrawingBoard } from './canvas.js';
 
 class ScribbleApp {
@@ -10,7 +17,8 @@ class ScribbleApp {
     this.roomCode = null;
     this.adminKey = null;
     this.myPlayerId = null;
-    this.currentAvatar = getRandomAvatar();
+    this.currentAvatar = getWaygroundHeroAvatar();
+    this.activeStudioCategory = 'outfit';
     this.roomState = null;
     this.drawingBoard = null;
     this.arenaBoard = null;
@@ -391,37 +399,89 @@ class ScribbleApp {
       document.getElementById('qrModal')?.classList.add('hidden');
     });
 
-    // Avatar Controls
+    // Avatar Quick-Cycle Controls
+    const cycleAvatarProp = (prop, list) => {
+      const currentVal = this.currentAvatar[prop];
+      const idx = (list.indexOf(currentVal) + 1) % list.length;
+      this.currentAvatar[prop] = list[idx];
+      this.renderAvatarPreview();
+    };
+
     document.getElementById('prevColorBtn')?.addEventListener('click', () => {
-      const skins = AVATAR_OPTIONS.skinColors;
-      const idx = (skins.indexOf(this.currentAvatar.skinColor) + 1) % skins.length;
-      this.currentAvatar.skinColor = skins[idx];
-      this.renderAvatarPreview();
+      cycleAvatarProp('skinColor', AVATAR_OPTIONS.skinColors);
     });
 
-    document.getElementById('nextEyeBtn')?.addEventListener('click', () => {
-      const eyes = AVATAR_OPTIONS.eyes;
-      const idx = (eyes.indexOf(this.currentAvatar.eye) + 1) % eyes.length;
-      this.currentAvatar.eye = eyes[idx];
-      this.renderAvatarPreview();
-    });
-
-    document.getElementById('nextMouthBtn')?.addEventListener('click', () => {
-      const mouths = AVATAR_OPTIONS.mouths;
-      const idx = (mouths.indexOf(this.currentAvatar.mouth) + 1) % mouths.length;
-      this.currentAvatar.mouth = mouths[idx];
-      this.renderAvatarPreview();
+    document.getElementById('nextHairBtn')?.addEventListener('click', () => {
+      cycleAvatarProp('hair', AVATAR_OPTIONS.hairs);
     });
 
     document.getElementById('nextAccBtn')?.addEventListener('click', () => {
-      const accs = AVATAR_OPTIONS.accessories;
-      const idx = (accs.indexOf(this.currentAvatar.accessory) + 1) % accs.length;
-      this.currentAvatar.accessory = accs[idx];
-      this.renderAvatarPreview();
+      cycleAvatarProp('hat', AVATAR_OPTIONS.hats);
+    });
+
+    document.getElementById('nextOutfitBtn')?.addEventListener('click', () => {
+      cycleAvatarProp('outfit', AVATAR_OPTIONS.outfits);
+    });
+
+    document.getElementById('nextEyeBtn')?.addEventListener('click', () => {
+      cycleAvatarProp('eye', AVATAR_OPTIONS.eyes);
+    });
+
+    document.getElementById('nextMouthBtn')?.addEventListener('click', () => {
+      cycleAvatarProp('mouth', AVATAR_OPTIONS.mouths);
+    });
+
+    document.getElementById('nextNeckBtn')?.addEventListener('click', () => {
+      cycleAvatarProp('accessory', AVATAR_OPTIONS.accessories);
+    });
+
+    document.getElementById('nextBackpackBtn')?.addEventListener('click', () => {
+      cycleAvatarProp('backpack', AVATAR_OPTIONS.backpacks);
     });
 
     document.getElementById('randomAvatarBtn')?.addEventListener('click', () => {
       this.currentAvatar = getRandomAvatar();
+      this.renderAvatarPreview();
+    });
+
+    // Wayground Character Studio Modal Triggers
+    document.getElementById('openAvatarStudioBtn')?.addEventListener('click', () => {
+      this.openAvatarStudio();
+    });
+
+    document.getElementById('closeAvatarStudioBtn')?.addEventListener('click', () => {
+      this.closeAvatarStudio();
+    });
+
+    document.getElementById('studioSaveBtn')?.addEventListener('click', () => {
+      this.closeAvatarStudio();
+    });
+
+    document.getElementById('studioHeroPresetBtn')?.addEventListener('click', () => {
+      this.currentAvatar = getWaygroundHeroAvatar();
+      this.renderStudioStage();
+      this.renderStudioItemsGrid();
+      this.renderAvatarPreview();
+    });
+
+    document.getElementById('studioRandomBtn')?.addEventListener('click', () => {
+      this.currentAvatar = getRandomAvatar();
+      this.renderStudioStage();
+      this.renderStudioItemsGrid();
+      this.renderAvatarPreview();
+    });
+
+    document.getElementById('stageRandomBtn')?.addEventListener('click', () => {
+      this.currentAvatar = getRandomAvatar();
+      this.renderStudioStage();
+      this.renderStudioItemsGrid();
+      this.renderAvatarPreview();
+    });
+
+    document.getElementById('stageResetBtn')?.addEventListener('click', () => {
+      this.currentAvatar = getWaygroundHeroAvatar();
+      this.renderStudioStage();
+      this.renderStudioItemsGrid();
       this.renderAvatarPreview();
     });
 
@@ -598,6 +658,113 @@ class ScribbleApp {
     const container = document.getElementById('avatarPreviewContainer');
     if (container) {
       container.innerHTML = renderAvatarSvg(this.currentAvatar, 110);
+    }
+  }
+
+  openAvatarStudio() {
+    const modal = document.getElementById('avatarStudioModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    this.renderStudioCategoryNav();
+    this.renderStudioItemsGrid();
+    this.renderStudioStage();
+  }
+
+  closeAvatarStudio() {
+    const modal = document.getElementById('avatarStudioModal');
+    if (modal) modal.classList.add('hidden');
+    this.renderAvatarPreview();
+  }
+
+  renderStudioCategoryNav() {
+    const nav = document.getElementById('studioCategoryNav');
+    if (!nav) return;
+
+    nav.innerHTML = AVATAR_CATEGORIES.map(cat => {
+      const isActive = cat.id === this.activeStudioCategory;
+      return `
+        <button type="button" class="studio-tab-btn ${isActive ? 'active' : ''}" data-cat="${cat.id}" title="${cat.name}">
+          <span class="studio-tab-icon">${cat.icon}</span>
+          <span class="studio-tab-label">${cat.name.split(' ')[0]}</span>
+        </button>
+      `;
+    }).join('');
+
+    nav.querySelectorAll('.studio-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const catId = btn.getAttribute('data-cat');
+        this.activeStudioCategory = catId;
+        this.renderStudioCategoryNav();
+        this.renderStudioItemsGrid();
+      });
+    });
+  }
+
+  renderStudioItemsGrid() {
+    const grid = document.getElementById('studioItemsGrid');
+    const titleEl = document.getElementById('studioCategoryTitle');
+    const descEl = document.getElementById('studioCategoryDesc');
+    if (!grid) return;
+
+    const currentCatObj = AVATAR_CATEGORIES.find(c => c.id === this.activeStudioCategory) || AVATAR_CATEGORIES[0];
+    const catId = currentCatObj.id;
+
+    // Get items list for this category
+    let itemList = [];
+    if (catId === 'skinColor') itemList = AVATAR_OPTIONS.skinColors;
+    else if (catId === 'hair') itemList = AVATAR_OPTIONS.hairs;
+    else if (catId === 'hat') itemList = AVATAR_OPTIONS.hats;
+    else if (catId === 'outfit') itemList = AVATAR_OPTIONS.outfits;
+    else if (catId === 'eye') itemList = AVATAR_OPTIONS.eyes;
+    else if (catId === 'mouth') itemList = AVATAR_OPTIONS.mouths;
+    else if (catId === 'accessory') itemList = AVATAR_OPTIONS.accessories;
+    else if (catId === 'backpack') itemList = AVATAR_OPTIONS.backpacks;
+
+    if (titleEl) {
+      titleEl.innerHTML = `${currentCatObj.name} <span class="studio-item-count" id="studioItemCount">(${itemList.length} items)</span>`;
+    }
+    if (descEl) descEl.textContent = currentCatObj.desc || 'Select an item to equip';
+
+    const detailsMap = AVATAR_ITEM_DETAILS[catId] || {};
+
+    grid.innerHTML = itemList.map(itemId => {
+      const isSelected = this.currentAvatar[catId] === itemId;
+      const details = detailsMap[itemId] || { name: itemId, icon: '✨' };
+
+      // Render thumbnail
+      let thumbHtml = '';
+      if (catId === 'skinColor') {
+        thumbHtml = `<div class="color-swatch-thumb" style="background-color: ${itemId};"></div>`;
+      } else {
+        // Create a live avatar preview with this specific item equipped!
+        const previewAvatar = { ...this.currentAvatar, [catId]: itemId };
+        thumbHtml = renderAvatarSvg(previewAvatar, 52);
+      }
+
+      return `
+        <div class="studio-item-card ${isSelected ? 'selected' : ''}" data-cat="${catId}" data-id="${itemId}" role="button" tabindex="0">
+          <div class="item-thumb-box">${thumbHtml}</div>
+          <div class="studio-item-title">${details.name || itemId}</div>
+        </div>
+      `;
+    }).join('');
+
+    grid.querySelectorAll('.studio-item-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const itemVal = card.getAttribute('data-id');
+        this.currentAvatar[catId] = itemVal;
+        this.renderStudioStage();
+        this.renderStudioItemsGrid();
+        this.renderAvatarPreview();
+        try { soundEngine?.play('click'); } catch (e) {}
+      });
+    });
+  }
+
+  renderStudioStage() {
+    const stage = document.getElementById('studioStageAvatar');
+    if (stage) {
+      stage.innerHTML = renderAvatarSvg(this.currentAvatar, 210);
     }
   }
 
