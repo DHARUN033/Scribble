@@ -58,6 +58,11 @@ export class GameRoom {
     this.playerOrder = [];
     // Current turn correct guessers
     this.guessHistory = [];
+    // Last round-end payload for reconnects
+    this.lastRoundEndData = null;
+    // Prevent duplicate turn-finalization and duplicate next-turn timers
+    this.isEndingTurn = false;
+    this.turnTransitionTimer = null;
     // Drawing actions buffer
     this.canvasStrokes = [];
     // Recent chat
@@ -214,15 +219,13 @@ export class GameRoom {
     this.players.forEach((p, socketId) => {
       const isDrawer = socketId === this.currentDrawerId;
       const isAdmin = p.role === 'admin';
-      const isArena = p.role === 'arena';
-      const hasGuessed = p.hasGuessed;
 
       // Who can see the full word?
       // Drawer always sees it.
       // Guessed player sees it.
       // Admin sees it if revealWord toggle or drawing phase.
       // Arena spectator sees masked word blanks, unless round ended.
-      const canSeeWord = isDrawer || hasGuessed || (isAdmin && this.settings.revealWordToAdmin) || this.state === 'ROUND_END' || this.state === 'GAME_OVER';
+      const canSeeWord = isDrawer || (isAdmin && this.settings.revealWordToAdmin) || this.state === 'ROUND_END' || this.state === 'GAME_OVER';
 
       this.io.to(socketId).emit('room_state', {
         code: this.code,
@@ -239,6 +242,8 @@ export class GameRoom {
         },
         currentDrawerId: this.currentDrawerId,
         currentDrawer: this.players.get(this.currentDrawerId) || null,
+        wordOptions: isDrawer && this.state === 'SELECTING_WORD' ? this.wordOptions : [],
+        roundEndData: this.state === 'ROUND_END' ? this.lastRoundEndData : null,
         word: canSeeWord ? this.currentWord : null,
         wordDisplay: canSeeWord ? this.currentWord : maskedWord,
         wordLength: this.currentWord ? this.currentWord.length : 0,
@@ -319,6 +324,12 @@ export class GameRoom {
   }
 
   nextTurn() {
+    this.isEndingTurn = false;
+    if (this.turnTransitionTimer) {
+      clearTimeout(this.turnTransitionTimer);
+      this.turnTransitionTimer = null;
+    }
+
     const activePlayers = this.getActivePlayers();
     if (activePlayers.length === 0) {
       this.state = 'LOBBY';
@@ -351,6 +362,7 @@ export class GameRoom {
     this.canvasStrokes = [];
     this.guessHistory = [];
     this.revealedHints.clear();
+    this.lastRoundEndData = null;
 
     // Reset hasGuessed and turnScore for everyone
     this.players.forEach(p => {
@@ -431,18 +443,19 @@ export class GameRoom {
 
       if (this.timeLeft <= 0) {
         this.clearTimer();
-        // If drawer failed to pick in time, they score 0 and turn moves to next player!
+        // If the drawer does not choose a word, auto-pick one so the round can continue.
         const drawerName = this.players.get(this.currentDrawerId)?.name || 'Drawer';
+        const fallbackWord = this.wordOptions[0] || this.pickTwoWords()[0] || MASTER_RANDOM_WORDS[Math.floor(Math.random() * MASTER_RANDOM_WORDS.length)] || 'drawing';
         this.broadcastChat({
           system: true,
-          text: `Time's up! ${drawerName} did not pick a word in time. (0 pts)`
+          text: `Time's up! ${drawerName} did not pick a word, so one was chosen automatically.`
         });
-        this.endTurn('Word selection timeout');
+        this.setChosenWord(this.currentDrawerId, fallbackWord, true);
       }
     }, 1000);
   }
 
-  setChosenWord(socketId, word) {
+  setChosenWord(socketId, word, autoSelected = false) {
     if (this.currentDrawerId !== socketId || this.state !== 'SELECTING_WORD') return;
 
     this.currentWord = word.trim();
@@ -461,7 +474,9 @@ export class GameRoom {
 
     this.broadcastChat({
       system: true,
-      text: `${this.players.get(socketId)?.name} selected a word! Start guessing!`
+      text: autoSelected
+        ? `${this.players.get(socketId)?.name} ran out of time. The word was auto-selected. Start guessing!`
+        : `${this.players.get(socketId)?.name} selected a word! Start guessing!`
     });
 
     this.startDrawingTimer();
@@ -577,39 +592,22 @@ export class GameRoom {
         // Correct guess!
         player.hasGuessed = true;
         player.streak += 1;
-
-        // Calculate dynamic Skribbl points
-        const basePoints = Math.round(500 * (this.timeLeft / this.settings.drawTime));
-        const timePoints = Math.max(150, basePoints);
-        const firstBonus = this.guessHistory.length === 0 ? 100 : 0;
-        const streakMultiplier = Math.min(1.5, 1 + ((player.streak - 1) * 0.1));
-        const totalAward = Math.round((timePoints + firstBonus) * streakMultiplier);
-
-        player.turnScore = totalAward;
-        player.score += totalAward;
         this.guessHistory.push({
           playerId: player.id,
           name: player.name,
-          points: totalAward,
+          timeLeft: this.timeLeft,
+          streak: player.streak,
           rank: this.guessHistory.length + 1
         });
 
-        // Award drawer points
-        const drawer = this.players.get(this.currentDrawerId);
-        if (drawer) {
-          const eligibleGuessers = this.getActivePlayers().filter(p => p.id !== drawer.id).length;
-          const drawerPoints = Math.round(400 / Math.max(1, eligibleGuessers));
-          drawer.score += drawerPoints;
-          drawer.turnScore = (drawer.turnScore || 0) + drawerPoints;
-        }
-
-        // Notify room
+        // Notify room immediately, but do not award points until the turn ends.
         this.io.to(this.code).emit('player_guessed_correctly', {
           playerId: player.id,
           playerName: player.name,
-          pointsEarned: totalAward,
+          pointsEarned: 0,
           streak: player.streak,
-          firstGuesser: firstBonus > 0
+          firstGuesser: this.guessHistory.length === 1,
+          scoreSettled: false
         });
 
         this.io.to(socketId).emit('audio_cue', { sound: 'correct_guess' });
@@ -618,7 +616,7 @@ export class GameRoom {
         this.broadcastChat({
           system: true,
           highlight: 'green',
-          text: `${player.name} guessed the word! (+${totalAward} pts)`
+          text: `${player.name} guessed the word! Scores will be revealed at the end of the turn.`
         });
 
         this.broadcastState();
@@ -655,11 +653,18 @@ export class GameRoom {
   }
 
   endTurn(reason = '') {
+    if (this.isEndingTurn || this.state === 'ROUND_END' || this.state === 'GAME_OVER') {
+      return;
+    }
+
+    this.isEndingTurn = true;
     this.clearTimer();
     this.state = 'ROUND_END';
 
     // Clear strokes on server
     this.canvasStrokes = [];
+
+    this.settleTurnScores();
 
     // Compile turn scoreboard (Skribbl style: non-guessers get 0)
     const roundScores = this.getActivePlayers().map(p => ({
@@ -675,6 +680,20 @@ export class GameRoom {
       return b.totalScore - a.totalScore;
     });
 
+    const isFinalRound = (this.currentRound >= this.settings.rounds) && 
+                         (this.drawerIndex + 1 >= this.getActivePlayers().length);
+
+    const roundEndData = {
+      word: this.currentWord,
+      reason,
+      scores: roundScores,
+      currentRound: this.currentRound,
+      totalRounds: this.settings.rounds,
+      isFinalRound,
+      duration: 5
+    };
+    this.lastRoundEndData = roundEndData;
+
     this.broadcastChat({
       system: true,
       text: `Turn finished! The secret word was: "${this.currentWord}". ${reason}`
@@ -682,26 +701,15 @@ export class GameRoom {
 
     this.io.to(this.code).emit('audio_cue', { sound: 'round_end' });
 
-    const isFinalRound = (this.currentRound >= this.settings.rounds) && 
-                         (this.drawerIndex + 1 >= this.getActivePlayers().length);
-
     // Emit round score reveal event to everyone (including arena display)
-    this.io.to(this.code).emit('round_end_scores', {
-      word: this.currentWord,
-      reason: reason,
-      scores: roundScores,
-      currentRound: this.currentRound,
-      totalRounds: this.settings.rounds,
-      isFinalRound: isFinalRound,
-      duration: 5
-    });
+    this.io.to(this.code).emit('round_end_scores', roundEndData);
 
     // Also emit canvas_clear so draw boards refresh automatically across all clients
     this.io.to(this.code).emit('canvas_clear');
 
     this.broadcastState();
 
-    setTimeout(() => {
+    this.turnTransitionTimer = setTimeout(() => {
       if (this.state === 'ROUND_END') {
         this.nextTurn();
       }
@@ -710,6 +718,11 @@ export class GameRoom {
 
   endGame() {
     this.clearTimer();
+    if (this.turnTransitionTimer) {
+      clearTimeout(this.turnTransitionTimer);
+      this.turnTransitionTimer = null;
+    }
+    this.isEndingTurn = false;
     this.state = 'GAME_OVER';
 
     // Calculate podium
@@ -759,6 +772,75 @@ export class GameRoom {
 
     db.updateLeaderboard(activePlayers, podium[0]?.name || null);
     db.updateRoomStatus(this.code, 'finished');
+  }
+
+  calculateGuessPoints({ timeLeft, streak = 1, isFirstGuess = false, rank = 1, totalGuessers = 1, previousPoints = Infinity }) {
+    // Only the LAST correct guesser receives 50. Everyone above must receive strictly more.
+    if (totalGuessers <= 1) {
+      return 50;
+    }
+
+    if (rank === totalGuessers) {
+      return 50;
+    }
+
+    const drawTime = Math.max(1, this.settings.drawTime || 1);
+    const timeFactor = Math.max(0, Math.min(1, (timeLeft || 0) / drawTime));
+    const rankFactor = (totalGuessers - rank) / Math.max(1, totalGuessers - 1);
+    const firstBonus = isFirstGuess ? 80 : 0;
+    const streakBonus = Math.min(90, Math.max(0, streak - 1) * 15);
+
+    let points = Math.round(60 + (rankFactor * 280) + (timeFactor * 120) + firstBonus + streakBonus);
+
+    // Enforce strict ladder order: each lower rank must score less than the rank above.
+    points = Math.min(points, previousPoints - 1);
+
+    // Non-last guessers should never drop to 50.
+    return Math.max(51, points);
+  }
+
+  settleTurnScores() {
+    const settledGuessers = [];
+
+    let previousPoints = Infinity;
+    const totalGuessers = this.guessHistory.length;
+
+    this.guessHistory.forEach((entry) => {
+      const player = this.players.get(entry.playerId);
+      if (!player) return;
+
+      const points = this.calculateGuessPoints({
+        timeLeft: entry.timeLeft,
+        streak: entry.streak,
+        isFirstGuess: entry.rank === 1,
+        rank: entry.rank,
+        totalGuessers,
+        previousPoints
+      });
+
+      previousPoints = points;
+      player.turnScore = points;
+      player.score += points;
+      settledGuessers.push(player.id);
+    });
+
+    const drawer = this.players.get(this.currentDrawerId);
+    if (drawer) {
+      const drawerPoints = this.guessHistory.length > 0
+        ? Math.round(400 / Math.max(1, this.guessHistory.length))
+        : 0;
+      drawer.turnScore = (drawer.turnScore || 0) + drawerPoints;
+      drawer.score += drawerPoints;
+    }
+
+    this.guessHistory = this.guessHistory.map((entry) => ({
+      ...entry,
+      points: settledGuessers.includes(entry.playerId)
+        ? (this.players.get(entry.playerId)?.turnScore || 0)
+        : 0
+    }));
+
+    return settledGuessers;
   }
 
   clearTimer() {

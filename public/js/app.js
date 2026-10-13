@@ -1335,10 +1335,20 @@ class ScribbleApp {
       }
     }
 
-    // Close round-end modal when active turn begins or match ends
-    if (state.state === 'SELECTING_WORD' || state.state === 'DRAWING' || state.state === 'LOBBY' || state.state === 'GAME_OVER') {
+    // Restore or close the round-end modal from server state.
+    if (state.state === 'ROUND_END' && state.roundEndData) {
+      this.showRoundEndModal(state.roundEndData);
+    } else if (state.state === 'SELECTING_WORD' || state.state === 'DRAWING' || state.state === 'LOBBY' || state.state === 'GAME_OVER') {
       if (this.roundEndTimeout) clearTimeout(this.roundEndTimeout);
       document.getElementById('roundEndModal')?.classList.add('hidden');
+    }
+
+    // Keep the word picker in sync for the drawer, even after reconnects.
+    const wordPickerVisible = state.state === 'SELECTING_WORD' && isMeDrawer && Array.isArray(state.wordOptions) && state.wordOptions.length > 0;
+    if (wordPickerVisible) {
+      this.showWordPickerModal(state.wordOptions, state.timeLeft);
+    } else if (state.state !== 'SELECTING_WORD') {
+      document.getElementById('wordPickerModal')?.classList.add('hidden');
     }
 
     // Update Player View HUD
@@ -1622,14 +1632,26 @@ class ScribbleApp {
     }
 
     if (container) {
+      const shouldStickToBottom = (container.scrollHeight - container.scrollTop - container.clientHeight) < 40;
       container.appendChild(msgEl);
-      container.scrollTop = container.scrollHeight;
+      while (container.children.length > 250) {
+        container.removeChild(container.firstChild);
+      }
+      if (shouldStickToBottom) {
+        container.scrollTop = container.scrollHeight;
+      }
     }
 
     if (arenaFeed) {
+      const shouldStickToBottom = (arenaFeed.scrollHeight - arenaFeed.scrollTop - arenaFeed.clientHeight) < 40;
       const arenaClone = msgEl.cloneNode(true);
       arenaFeed.appendChild(arenaClone);
-      arenaFeed.scrollTop = arenaFeed.scrollHeight;
+      while (arenaFeed.children.length > 250) {
+        arenaFeed.removeChild(arenaFeed.firstChild);
+      }
+      if (shouldStickToBottom) {
+        arenaFeed.scrollTop = arenaFeed.scrollHeight;
+      }
     }
   }
 

@@ -6,6 +6,9 @@ export class DrawingBoard {
     this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
     this.isInteractive = options.isInteractive !== false;
     this.onStroke = options.onStroke || null;
+    this.canvas.style.touchAction = 'none';
+    this.canvas.style.userSelect = 'none';
+    this.canvas.style.webkitUserSelect = 'none';
 
     // Fixed virtual resolution for pixel-perfect cross-device parity
     this.virtualWidth = 800;
@@ -68,6 +71,9 @@ export class DrawingBoard {
     const startHandler = (e) => {
       if (!this.isInteractive) return;
       e.preventDefault();
+      if (this.canvas.setPointerCapture && e.pointerId !== undefined) {
+        this.canvas.setPointerCapture(e.pointerId);
+      }
       const pos = this.getPointerPos(e);
 
       if (this.currentTool === 'fill') {
@@ -120,20 +126,23 @@ export class DrawingBoard {
 
     const endHandler = (e) => {
       if (!this.isDrawing) return;
+      if (this.canvas.releasePointerCapture && e.pointerId !== undefined) {
+        try {
+          this.canvas.releasePointerCapture(e.pointerId);
+        } catch {
+          // Ignore if the pointer is already released.
+        }
+      }
       this.isDrawing = false;
       this.currentStrokePoints = [];
       this.lastPoint = null;
     };
 
-    // Mouse
-    this.canvas.addEventListener('mousedown', startHandler);
-    window.addEventListener('mousemove', moveHandler);
-    window.addEventListener('mouseup', endHandler);
-
-    // Touch
-    this.canvas.addEventListener('touchstart', startHandler, { passive: false });
-    window.addEventListener('touchmove', moveHandler, { passive: false });
-    window.addEventListener('touchend', endHandler);
+    this.canvas.addEventListener('pointerdown', startHandler);
+    this.canvas.addEventListener('pointermove', moveHandler);
+    this.canvas.addEventListener('pointerup', endHandler);
+    this.canvas.addEventListener('pointercancel', endHandler);
+    this.canvas.addEventListener('lostpointercapture', endHandler);
   }
 
   undo() {
