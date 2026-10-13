@@ -454,14 +454,34 @@ export class GameRoom {
 
   startDrawingTimer() {
     this.clearTimer();
-    const halfTime = Math.floor(this.settings.drawTime * 0.5);
-    const quarterTime = Math.floor(this.settings.drawTime * 0.25);
+
+    // Calculate dynamic letter hint reveals as countdown ticks down
+    const cleanWordLetters = this.currentWord ? this.currentWord.replace(/[\s-]/g, '') : '';
+    const wordLen = cleanWordLetters.length;
+    const maxHints = wordLen <= 2 ? 0 : wordLen <= 4 ? 1 : wordLen <= 7 ? 2 : 3;
+
+    const hintCheckpoints = [];
+    if (maxHints === 1) {
+      hintCheckpoints.push(Math.floor(this.settings.drawTime * 0.5));
+    } else if (maxHints === 2) {
+      hintCheckpoints.push(Math.floor(this.settings.drawTime * 0.6));
+      hintCheckpoints.push(Math.floor(this.settings.drawTime * 0.3));
+    } else if (maxHints >= 3) {
+      hintCheckpoints.push(Math.floor(this.settings.drawTime * 0.7));
+      hintCheckpoints.push(Math.floor(this.settings.drawTime * 0.45));
+      hintCheckpoints.push(Math.floor(this.settings.drawTime * 0.2));
+    }
 
     this.timerInterval = setInterval(() => {
       if (this.isPaused) return;
 
       this.timeLeft--;
       this.io.to(this.code).emit('timer_tick', { timeLeft: this.timeLeft, state: this.state });
+
+      // Automatically reveal one by one hint letters as countdown progresses
+      if (hintCheckpoints.includes(this.timeLeft)) {
+        this.revealRandomHint();
+      }
 
       // Audio cue for last 10 seconds
       if (this.timeLeft <= 10 && this.timeLeft > 0) {
