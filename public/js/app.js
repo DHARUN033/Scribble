@@ -1410,10 +1410,32 @@ class ScribbleApp {
     if (!modal || !container) return;
 
     container.innerHTML = '';
-    options.forEach(w => {
+    options.forEach((w, idx) => {
       const btn = document.createElement('button');
-      btn.className = 'word-choice-btn';
-      btn.textContent = w;
+      btn.className = 'word-choice-btn stealth-choice-btn';
+      btn.type = 'button';
+      btn.title = 'Hover or hold to peek at this word';
+      btn.innerHTML = `
+        <span class="choice-unrevealed">
+          <span style="font-size:1.15rem;margin-bottom:2px;">🔒</span>
+          <span>WORD ${idx + 1}</span>
+          <small style="font-size:0.72rem;color:#94a3b8;font-weight:600;margin-top:2px;">[Hover / Hold to Peek]</small>
+        </span>
+        <span class="choice-revealed">
+          <span style="color:var(--accent-cyan);">👁️</span>
+          <span>${this.escapeHtml(w)}</span>
+        </span>
+      `;
+
+      // Touch / mouse listeners for hold-to-peek on touchscreen devices
+      const onPeek = () => btn.classList.add('peeking');
+      const onUnpeek = () => btn.classList.remove('peeking');
+
+      btn.addEventListener('mouseenter', onPeek);
+      btn.addEventListener('mouseleave', onUnpeek);
+      btn.addEventListener('touchstart', onPeek, { passive: true });
+      btn.addEventListener('touchend', onUnpeek);
+
       btn.addEventListener('click', () => {
         this.selectWord(w);
       });
