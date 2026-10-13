@@ -13,12 +13,12 @@ if (supabaseUrl && supabaseKey && supabaseUrl.startsWith('http')) {
     supabase = createClient(supabaseUrl, supabaseKey, {
       auth: { persistSession: false }
     });
-    console.log(`[Supabase] ⚡ Connected to Supabase: ${supabaseUrl}`);
+    console.log(`[Supabase] Connected to Supabase: ${supabaseUrl}`);
   } catch (err) {
-    console.error(`[Supabase] ❌ Initialization failed:`, err.message);
+    console.error(`[Supabase] Initialization failed:`, err.message);
   }
 } else {
-  console.log(`[Supabase] ℹ️ Running without Supabase cloud credentials. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env to enable cloud persistence.`);
+  console.log(`[Supabase] Running without Supabase cloud credentials. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env to enable cloud persistence.`);
 }
 
 const memoryGameSessions = [];

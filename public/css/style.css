@@ -384,12 +384,22 @@ body {
 }
 
 .avatar-controls-grid button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 6px 4px;
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.avatar-controls-grid button svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
 .studio-open-btn {
@@ -3114,9 +3124,9 @@ body {
 }
 
 /* ==========================================================================
-   WAYGROUND CHARACTER STUDIO MODAL
+   CHARACTER STUDIO MODAL
    ========================================================================== */
-.wayground-studio-container {
+.character-studio-container {
   width: 95vw;
   max-width: 1040px;
   height: 85vh;
@@ -3142,7 +3152,7 @@ body {
   }
 }
 
-.wayground-studio-header {
+.character-studio-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3214,14 +3224,14 @@ body {
 }
 
 /* Studio Body Layout */
-.wayground-studio-body {
+.character-studio-body {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 1. Left Sidebar Navigation (Matching Wayground screenshot category icons) */
-.wayground-sidebar {
+/* 1. Left Sidebar Navigation (Category icons) */
+.character-sidebar {
   width: 76px;
   background: rgba(6, 9, 18, 0.95);
   border-right: 1px solid rgba(255, 255, 255, 0.07);
@@ -3276,8 +3286,23 @@ body {
 }
 
 .studio-tab-icon {
-  font-size: 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+  color: #94a3b8;
+  transition: color 0.15s ease;
+}
+
+.studio-tab-icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.studio-tab-btn.active .studio-tab-icon,
+.studio-tab-btn:hover .studio-tab-icon {
+  color: #38bdf8;
 }
 
 .studio-tab-label {
@@ -3294,7 +3319,7 @@ body {
 }
 
 /* 2. Center Items Panel */
-.wayground-items-panel {
+.character-items-panel {
   flex: 1;
   padding: 20px 24px;
   overflow-y: auto;
@@ -3303,7 +3328,7 @@ body {
   background: rgba(13, 19, 33, 0.4);
 }
 
-.wayground-items-header {
+.character-items-header {
   margin-bottom: 16px;
 }
 
@@ -3313,7 +3338,7 @@ body {
   font-weight: 500;
 }
 
-.wayground-items-grid {
+.character-items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
   gap: 14px;
@@ -3350,7 +3375,7 @@ body {
 }
 
 .studio-item-card.selected::after {
-  content: '✓';
+  content: '\2713';
   position: absolute;
   top: 6px;
   right: 6px;
@@ -3403,8 +3428,8 @@ body {
   line-height: 1.25;
 }
 
-/* 3. Right Character Stage (High-tech hangar arena stage from Wayground Image 2) */
-.wayground-stage-panel {
+/* 3. Right Character Stage (High-tech hangar arena stage) */
+.character-stage-panel {
   width: 320px;
   background: radial-gradient(circle at 50% 35%, rgba(14, 165, 233, 0.18) 0%, rgba(7, 10, 20, 0.95) 75%);
   border-left: 1px solid rgba(255, 255, 255, 0.08);
@@ -3486,14 +3511,14 @@ body {
 
 /* Responsive adjustments for mobile/smaller screens */
 @media (max-width: 900px) {
-  .wayground-studio-container {
+  .character-studio-container {
     height: 92vh;
     max-height: none;
   }
-  .wayground-studio-body {
+  .character-studio-body {
     flex-direction: column-reverse;
   }
-  .wayground-stage-panel {
+  .character-stage-panel {
     width: 100%;
     height: 180px;
     border-left: none;
@@ -3508,7 +3533,7 @@ body {
     width: 110px;
     height: 16px;
   }
-  .wayground-sidebar {
+  .character-sidebar {
     width: 100%;
     height: 60px;
     flex-direction: row;

@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scribble Arena - Multiplayer Drawing & Guessing Game</title>
+  <title>Scribble Arena - Multiplayer Drawing &amp; Guessing Game</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=4">
+  <link rel="stylesheet" href="/css/style.css?v=5">
   <!-- Socket.IO Client (CDN first with local server fallback) -->
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <script>
@@ -23,9 +23,14 @@
   <!-- Live Server Status / Connection Notice Banner -->
   <div id="serverNoticeBanner" class="server-notice-banner hidden">
     <div class="server-notice-content">
-      <span class="server-notice-icon">⚠️</span>
+      <span class="server-notice-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </span>
       <span id="serverNoticeText" class="server-notice-text">Connecting to Game Server...</span>
-      <button id="serverConfigBannerBtn" class="btn-xs btn-outline">⚙️ Server Settings</button>
+      <button id="serverConfigBannerBtn" class="btn-xs btn-outline">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Server Settings
+      </button>
     </div>
   </div>
 
@@ -33,22 +38,40 @@
   <header class="app-header">
     <div class="header-left">
       <div class="brand-logo" id="brandLogo">
-        <span class="brand-icon">✏️</span>
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        </span>
         <span class="brand-text">SCRIBBLE<span class="brand-accent">ARENA</span></span>
       </div>
       <div id="roomBadgeContainer" class="room-badge-container hidden">
         <span class="room-code-tag">ROOM: <strong id="headerRoomCode">------</strong></span>
-        <button id="copyInviteBtn" class="btn-icon" title="Copy Invite Link">🔗</button>
-        <button id="showQrBtn" class="btn-icon" title="Show QR Code">📱</button>
+        <button id="copyInviteBtn" class="btn-icon" title="Copy Invite Link">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+        <button id="showQrBtn" class="btn-icon" title="Show QR Code">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </button>
       </div>
     </div>
 
     <div class="header-right">
       <div class="audio-controls">
-        <button id="serverStatusHeaderBtn" class="btn-audio" title="Server Connection Status">🟢 Server: Online</button>
-        <button id="hallOfFameBtn" class="btn-audio" title="View All Lobby Results & Match Archives">📋 All Lobby Results</button>
-        <button id="bgmToggleBtn" class="btn-audio" title="Toggle Upbeat Music">🎵 BGM: OFF</button>
-        <button id="sfxToggleBtn" class="btn-audio" title="Toggle Sound FX">🔊 SFX: ON</button>
+        <button id="serverStatusHeaderBtn" class="btn-audio" title="Server Connection Status">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="#10b981"><circle cx="12" cy="12" r="6"/></svg>
+          Server: Online
+        </button>
+        <button id="hallOfFameBtn" class="btn-audio" title="View All Lobby Results &amp; Match Archives">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          All Lobby Results
+        </button>
+        <button id="bgmToggleBtn" class="btn-audio" title="Toggle Upbeat Music">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          BGM: OFF
+        </button>
+        <button id="sfxToggleBtn" class="btn-audio" title="Toggle Sound FX">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          SFX: ON
+        </button>
         <div class="volume-slider-group">
           <span class="vol-label">VOL</span>
           <input type="range" id="masterVolume" min="0" max="1" step="0.05" value="0.7">
@@ -67,9 +90,18 @@
     <section id="lobbyScreen" class="view-screen active-screen">
       <div class="lobby-card glass-panel">
         <div class="lobby-tabs">
-          <button class="lobby-tab-btn active" data-tab="tabPlayer">🎮 Join as Player</button>
-          <button class="lobby-tab-btn" data-tab="tabAdmin">👑 Host / Admin</button>
-          <button class="lobby-tab-btn" data-tab="tabArena">📺 Arena Display</button>
+          <button class="lobby-tab-btn active" data-tab="tabPlayer">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="4"/></svg>
+            Join as Player
+          </button>
+          <button class="lobby-tab-btn" data-tab="tabAdmin">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M3 20h18"/></svg>
+            Host / Admin
+          </button>
+          <button class="lobby-tab-btn" data-tab="tabArena">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="15" x="2" y="3" rx="2"/><polyline points="17 21 12 18 7 21"/></svg>
+            Arena Display
+          </button>
         </div>
 
         <!-- TAB 1: JOIN AS PLAYER -->
@@ -78,24 +110,54 @@
           <div class="lobby-form-grid">
             <div class="avatar-builder-section">
               <div class="avatar-header-row">
-                <label class="form-label mb-0">Customize Avatar</label>
-                <span class="qbit-pill">Qbit v2</span>
+                <label class="form-label mb-0">Customize Character</label>
+                <span class="qbit-pill">Avatar Studio</span>
               </div>
               <div class="avatar-preview-box" id="avatarPreviewContainer">
                 <!-- Injected via Avatar JS -->
               </div>
               <div class="avatar-controls-grid">
-                <button type="button" class="btn-sm btn-subtle" id="prevColorBtn" title="Body Color">🎨 Skin</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextHairBtn" title="Hairstyle">💇 Hair</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextAccBtn" title="Hat / Headwear">🧢 Hat</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextOutfitBtn" title="Clothes / Outfit">👕 Outfit</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextEyeBtn" title="Eyes">👀 Eyes</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextMouthBtn" title="Mouth">👄 Mouth</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextNeckBtn" title="Neck Accessory">🧣 Scarf</button>
-                <button type="button" class="btn-sm btn-subtle" id="nextBackpackBtn" title="Backpack Gear">🎒 Pack</button>
+                <button type="button" class="btn-sm btn-subtle" id="prevColorBtn" title="Body Color">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"/></svg>
+                  Skin
+                </button>
+                <button type="button" class="btn-sm btn-subtle" id="nextHairBtn" title="Hairstyle">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+                  Hair
+                </button>
+                <button type="button" class="btn-sm btn-subtle" id="nextAccBtn" title="Hat / Headwear">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 17h20"/><path d="M5 17v-4a7 7 0 0 1 14 0v4"/><path d="M19 17h3a2 2 0 0 1 2 2v0a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1v0a2 2 0 0 1 2-2h3"/></svg>
+                  Hat
+                </button>
+                <button type="button" class="btn-sm btn-subtle" id="nextOutfitBtn" title="Clothes / Outfit">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                  Outfit
+                </button>
+                <button type="button" class="btn-sm btn-subtle" id="nextEyeBtn" title="Eyes">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Eyes
+                </button>
+                <button type="button" class="btn-sm btn-subtle" id="nextMouthBtn" title="Mouth">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 3 4 3 4-3 4-3"/></svg>
+                  Mouth
+                </button>
+                <button type="button" class="btn-sm btn-subtle" id="nextNeckBtn" title="Neck Accessory">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+                  Scarf
+                </button>
+                <button type="button" class="btn-sm btn-subtle" id="nextBackpackBtn" title="Backpack Gear">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="7" width="14" height="14" rx="4"/><path d="M9 7V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3"/><path d="M9 12h6"/><path d="M12 10v4"/></svg>
+                  Pack
+                </button>
               </div>
-              <button type="button" class="btn-primary studio-open-btn full-width" id="openAvatarStudioBtn">✨ Open Wayground Studio</button>
-              <button type="button" class="btn-sm btn-subtle full-width" id="randomAvatarBtn">🎲 Quick Randomize</button>
+              <button type="button" class="btn-primary studio-open-btn full-width" id="openAvatarStudioBtn">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+                Open Character Studio
+              </button>
+              <button type="button" class="btn-sm btn-subtle full-width" id="randomAvatarBtn">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                Quick Randomize
+              </button>
             </div>
 
             <div class="player-info-section">
@@ -124,7 +186,10 @@
                   </label>
                 </div>
               </div>
-              <button id="joinPlayerBtn" class="btn-primary btn-large full-width">🚀 PLAY NOW</button>
+              <button id="joinPlayerBtn" class="btn-primary btn-large full-width">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                PLAY NOW
+              </button>
             </div>
           </div>
         </div>
@@ -172,11 +237,17 @@
               <div class="team-selector-row">
                 <label class="team-radio">
                   <input type="radio" name="adminWordMode" value="random" checked>
-                  <span class="team-badge">🎲 Random Words (Automatic)</span>
+                  <span class="team-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                    Random Words (Automatic)
+                  </span>
                 </label>
                 <label class="team-radio">
                   <input type="radio" name="adminWordMode" value="custom">
-                  <span class="team-badge badge-blue">✍️ Custom Word List (Admin Enters Words)</span>
+                  <span class="team-badge badge-blue">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Custom Word List (Admin Enters Words)
+                  </span>
                 </label>
               </div>
             </div>
@@ -188,7 +259,10 @@
               <div class="field-help" id="wordCountHelp">Enter custom words for this game lobby</div>
             </div>
 
-            <button id="createRoomBtn" class="btn-primary btn-large full-width">👑 CREATE ROOM & OPEN ADMIN CONTROLS</button>
+            <button id="createRoomBtn" class="btn-primary btn-large full-width">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M3 20h18"/></svg>
+              CREATE ROOM &amp; OPEN ADMIN CONTROLS
+            </button>
             
             <div class="reconnect-admin-box">
               <span class="divider-text">OR RECONNECT EXISTING HOST</span>
@@ -210,7 +284,10 @@
               <label for="arenaRoomCode" class="form-label">Room Code to Display</label>
               <input type="text" id="arenaRoomCode" class="form-input code-input" placeholder="e.g. SKR8X2" maxlength="6">
             </div>
-            <button id="launchArenaBtn" class="btn-primary btn-large full-width">📺 LAUNCH BIG SCREEN DISPLAY</button>
+            <button id="launchArenaBtn" class="btn-primary btn-large full-width">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="15" x="2" y="3" rx="2"/><polyline points="17 21 12 18 7 21"/></svg>
+              LAUNCH BIG SCREEN DISPLAY
+            </button>
           </div>
         </div>
 
@@ -262,7 +339,10 @@
         <!-- Left: Leaderboard & Player List -->
         <aside class="leaderboard-panel glass-panel">
           <div class="panel-header">
-            <h3>🏆 Leaderboard</h3>
+            <h3>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              Leaderboard
+            </h3>
             <span id="playerCountBadge" class="badge">0</span>
           </div>
           
@@ -301,9 +381,9 @@
             <!-- Drawer 2-Word Selection Modal -->
             <div id="wordPickerModal" class="word-picker-modal hidden">
               <div class="word-picker-card glass-panel">
-                <h2>🎨 CHOOSE YOUR WORD</h2>
+                <h2>CHOOSE YOUR WORD</h2>
                 <p style="color:var(--text-muted); font-size:0.9rem;">
-                  🔒 <strong>Anti-Peeking Active:</strong> Hover over each card to peek at the word, then click to choose!
+                  <strong>Anti-Peeking Active:</strong> Hover over each card to peek at the word, then click to choose!
                 </p>
                 <div class="word-choices-row" id="wordChoicesContainer">
                   <!-- Injected choices -->
@@ -319,12 +399,25 @@
           <div id="drawerToolbar" class="drawer-toolbar glass-panel hidden">
             <!-- Tool buttons -->
             <div class="tool-group">
-              <button class="tool-btn active" data-tool="brush" id="toolBrush" title="Brush">🖌️</button>
-              <button class="tool-btn" data-tool="fill" id="toolFill" title="Bucket Fill">🪣</button>
-              <button class="tool-btn" data-tool="eraser" id="toolEraser" title="Eraser">🧹</button>
-              <button class="tool-btn" id="toolUndo" title="Undo">↩️</button>
-              <button class="tool-btn" id="toolClear" title="Clear Canvas">🗑️</button>
-              <button class="tool-btn btn-bomb" id="toolBomb" title="Bomb Erase (Power-up)">💣 BOMB</button>
+              <button class="tool-btn active" data-tool="brush" id="toolBrush" title="Brush">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-1.92 2 .76 1.15 2.05 1.95 3.52 1.95 2.43 0 4.4-1.97 4.4-4.4 0-.82-.23-1.6-.64-2.26l-2.36-.29z"/></svg>
+              </button>
+              <button class="tool-btn" data-tool="fill" id="toolFill" title="Bucket Fill">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"/><path d="m5 2 5 5"/><path d="M2 13h15"/><path d="M22 20a2 2 0 1 1-4 0c0-1.6 2-4 2-4s2 2.4 2 4Z"/></svg>
+              </button>
+              <button class="tool-btn" data-tool="eraser" id="toolEraser" title="Eraser">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+              </button>
+              <button class="tool-btn" id="toolUndo" title="Undo">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+              </button>
+              <button class="tool-btn" id="toolClear" title="Clear Canvas">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </button>
+              <button class="tool-btn btn-bomb" id="toolBomb" title="Bomb Erase (Power-up)">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="13" r="8"/><path d="m17 7 3-3"/><path d="M21 2h-4v4"/></svg>
+                BOMB
+              </button>
             </div>
 
             <!-- Brush Size Picker -->
@@ -347,7 +440,7 @@
           <!-- Guesser Action Bar (Visible when you are guessing) -->
           <div id="guesserActionBar" class="guesser-action-bar glass-panel">
             <div class="guesser-status" id="guesserStatusText">
-              Type your guess in the chat box on the right! 💡
+              Type your guess in the chat box on the right!
             </div>
           </div>
 
@@ -356,7 +449,10 @@
         <!-- Right: Live Chat & Guessing Place -->
         <aside class="chat-panel glass-panel">
           <div class="panel-header">
-            <h3>💬 Guess Feed & Chat</h3>
+            <h3>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Guess Feed &amp; Chat
+            </h3>
             <span class="chat-hint">Guesses go here</span>
           </div>
 
@@ -366,7 +462,7 @@
 
           <!-- Close Guess Banner -->
           <div id="closeGuessAlert" class="close-guess-banner hidden">
-            🔥 You are very close! Keep guessing!
+            You are very close! Keep guessing!
           </div>
 
           <!-- Chat Input Form -->
@@ -388,7 +484,10 @@
         <!-- Admin Header Bar -->
         <div class="admin-header glass-panel">
           <div class="admin-meta">
-            <h2>👑 Host & Game Master Control Room</h2>
+            <h2>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M3 20h18"/></svg>
+              Host &amp; Game Master Control Room
+            </h2>
             <div class="admin-badges">
               <span class="badge badge-primary">ROOM: <strong id="adminDisplayRoomCode">------</strong></span>
               <span class="badge badge-warning">ADMIN KEY: <strong id="adminDisplayKey">------</strong></span>
@@ -396,11 +495,26 @@
             </div>
           </div>
           <div class="admin-quick-actions">
-            <button id="adminStartGameBtn" class="btn-primary">▶️ START GAME</button>
-            <button id="adminPauseBtn" class="btn-secondary">⏸️ PAUSE</button>
-            <button id="adminSkipBtn" class="btn-secondary">⏭️ SKIP TURN</button>
-            <button id="adminEndGameBtn" class="btn-secondary">🛑 END MATCH</button>
-            <button id="adminCloseLobbyBtn" class="btn-danger">🚪 CLOSE LOBBY</button>
+            <button id="adminStartGameBtn" class="btn-primary">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              START GAME
+            </button>
+            <button id="adminPauseBtn" class="btn-secondary">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              PAUSE
+            </button>
+            <button id="adminSkipBtn" class="btn-secondary">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/></svg>
+              SKIP TURN
+            </button>
+            <button id="adminEndGameBtn" class="btn-secondary">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+              END MATCH
+            </button>
+            <button id="adminCloseLobbyBtn" class="btn-danger">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              CLOSE LOBBY
+            </button>
           </div>
         </div>
 
@@ -410,7 +524,10 @@
           <!-- Left: Live Leaderboard & Player Moderation -->
           <div class="admin-card glass-panel">
             <div class="card-title-row">
-              <h3>👥 Player Management & Points Adjustment</h3>
+              <h3>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Player Management &amp; Points Adjustment
+              </h3>
               <span class="badge" id="adminPlayerCount">0 Players</span>
             </div>
             <p class="section-desc">Award bonus points, deduct points, mute disruptive players, or kick them from the match.</p>
@@ -433,7 +550,10 @@
 
             <hr class="admin-divider">
             <div class="card-title-row">
-              <h3>📋 Player Entry & Exit Activity Log</h3>
+              <h3>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Player Entry &amp; Exit Activity Log
+              </h3>
               <span class="badge" id="adminLogCount">0 Events</span>
             </div>
             <div class="activity-log-box" id="adminActivityLogBox">
@@ -444,7 +564,10 @@
           <!-- Right: Live Match Monitor & Word List Controls -->
           <div class="admin-card glass-panel">
             <div class="card-title-row">
-              <h3>🎯 Live Turn Monitor & Secret Word</h3>
+              <h3>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                Live Turn Monitor &amp; Secret Word
+              </h3>
               <label class="toggle-switch">
                 <input type="checkbox" id="adminRevealWordToggle" checked>
                 <span>Reveal Secret Word to Host</span>
@@ -459,17 +582,29 @@
 
             <hr class="admin-divider">
 
-            <h3>📝 Word Pool (Live Update)</h3>
+            <h3>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Word Pool (Live Update)
+            </h3>
             <p class="section-desc">Leave empty for automatic Random Words, or enter custom words (comma-separated):</p>
             <textarea id="adminLiveWordList" class="form-textarea" rows="4" placeholder="Leave empty for Random Words, or type custom words..."></textarea>
             <div class="admin-button-row">
-              <button id="adminSaveWordsBtn" class="btn-subtle">💾 Update Word List</button>
-              <button id="adminOpenArenaLinkBtn" class="btn-subtle">📺 Open Arena Display in New Tab</button>
+              <button id="adminSaveWordsBtn" class="btn-subtle">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Update Word List
+              </button>
+              <button id="adminOpenArenaLinkBtn" class="btn-subtle">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="15" x="2" y="3" rx="2"/><polyline points="17 21 12 18 7 21"/></svg>
+                Open Arena Display in New Tab
+              </button>
             </div>
 
             <hr class="admin-divider">
 
-            <h3>⚙️ Live Room Rules</h3>
+            <h3>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Live Room Rules
+            </h3>
             <div class="form-row-2">
               <div class="form-group">
                 <label class="form-label">Rounds</label>
@@ -554,7 +689,10 @@
             <!-- Live Leaderboard -->
             <div class="arena-card glass-panel arena-leaderboard-box">
               <div class="arena-card-header">
-                <h3>🏆 LIVE LEADERBOARD</h3>
+                <h3>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                  LIVE LEADERBOARD
+                </h3>
                 <span class="badge" id="arenaPlayerCount">0 PLAYERS</span>
               </div>
               <div id="arenaLeaderboardList" class="arena-leaderboard-list">
@@ -565,7 +703,10 @@
             <!-- Live Audience Guesses -->
             <div class="arena-card glass-panel arena-guesses-box">
               <div class="arena-card-header">
-                <h3>💬 AUDIENCE GUESSES</h3>
+                <h3>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  AUDIENCE GUESSES
+                </h3>
               </div>
               <div id="arenaChatFeed" class="arena-chat-feed">
                 <!-- Injected via JS -->
@@ -582,11 +723,11 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- MODAL: ROUND / TURN END SCORES (SKRIBBL STYLE) -->
+  <!-- MODAL: ROUND / TURN END SCORES             -->
   <!-- ========================================== -->
   <div id="roundEndModal" class="modal-overlay hidden">
     <div class="round-end-card glass-panel" style="position: relative;">
-      <button id="roundEndCloseBtn" class="modal-close-cross" title="Close scoreboard">✕</button>
+      <button id="roundEndCloseBtn" class="modal-close-cross" title="Close scoreboard">&times;</button>
       <div class="round-end-header">
         <span id="roundEndBadge" class="round-end-badge">ROUND 1 / 3 COMPLETE</span>
         <h2 class="round-end-title">The word was: <span id="roundEndWord" class="round-end-word-highlight">...</span></h2>
@@ -619,7 +760,10 @@
   <div id="podiumModal" class="modal-overlay hidden">
     <div class="podium-card glass-panel">
       <div class="podium-header">
-        <h1 class="podium-title">🏆 VICTORY PODIUM 🏆</h1>
+        <h1 class="podium-title">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-4px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          VICTORY PODIUM
+        </h1>
         <p class="podium-subtitle">The match has ended! Congratulations to our champions!</p>
       </div>
 
@@ -631,7 +775,7 @@
       <!-- 4th and 5th on Row Bases -->
       <div id="podiumRowBasesContainer" class="podium-row-bases-container hidden">
         <div class="row-bases-header">
-          <span>RUNNERS-UP (4TH & 5TH ON ROW BASES)</span>
+          <span>RUNNERS-UP (4TH &amp; 5TH ON ROW BASES)</span>
           <span>SCORE</span>
         </div>
         <div id="podiumRowBases" class="podium-row-bases">
@@ -640,7 +784,10 @@
       </div>
 
       <div class="podium-actions">
-        <button id="viewFullReportBtn" class="btn-secondary btn-large">📊 View Full Report</button>
+        <button id="viewFullReportBtn" class="btn-secondary btn-large">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          View Full Report
+        </button>
         <button id="podiumCloseBtn" class="btn-primary btn-large">Return to Lobby</button>
       </div>
     </div>
@@ -652,7 +799,10 @@
   <div id="fullReportModal" class="modal-overlay hidden">
     <div class="podium-card glass-panel full-report-card">
       <div class="podium-header">
-        <h1 class="podium-title" style="font-size: 1.8rem;">📊 FULL MATCH REPORT</h1>
+        <h1 class="podium-title" style="font-size: 1.8rem;">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          FULL MATCH REPORT
+        </h1>
         <p class="podium-subtitle" id="fullReportSubtitle">Complete player rankings and earned points breakdown</p>
       </div>
 
@@ -669,7 +819,7 @@
       </div>
 
       <div class="podium-actions" style="margin-top: 20px;">
-        <button id="closeFullReportBtn" class="btn-secondary btn-large">← Back to Podium</button>
+        <button id="closeFullReportBtn" class="btn-secondary btn-large">&larr; Back to Podium</button>
         <button id="fullReportLobbyBtn" class="btn-primary btn-large">Return to Lobby</button>
       </div>
     </div>
@@ -692,20 +842,26 @@
   <!-- ========================================== -->
   <div id="hallOfFameModal" class="modal-overlay hidden">
     <div class="glass-panel lobby-results-card">
-      <button id="lobbyResultsCrossBtn" class="modal-close-cross" title="Close">×</button>
+      <button id="lobbyResultsCrossBtn" class="modal-close-cross" title="Close">&times;</button>
 
       <div class="podium-header">
         <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
-          <h1 class="podium-title" style="font-size:1.8rem;margin-bottom:0;">📋 ALL LOBBY RESULTS</h1>
-          <button id="refreshLobbyResultsBtn" class="btn-sm btn-subtle" title="Refresh Latest Lobby Results">🔄 Refresh</button>
+          <h1 class="podium-title" style="font-size:1.8rem;margin-bottom:0;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            ALL LOBBY RESULTS
+          </h1>
+          <button id="refreshLobbyResultsBtn" class="btn-sm btn-subtle" title="Refresh Latest Lobby Results">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Refresh
+          </button>
         </div>
         <p class="podium-subtitle">Real-time match archives, winners, and player points across all lobbies.</p>
       </div>
 
       <!-- Navigation tabs: Lobby Matches vs Global All-Time Ranks -->
       <div class="lobby-results-tabs">
-        <button id="tabLobbyMatchesBtn" class="lobby-results-tab-btn active">🏁 Completed Lobbies (<span id="lobbyMatchCount">0</span>)</button>
-        <button id="tabGlobalRanksBtn" class="lobby-results-tab-btn">🌟 All-Time Player Ranks</button>
+        <button id="tabLobbyMatchesBtn" class="lobby-results-tab-btn active">Completed Lobbies (<span id="lobbyMatchCount">0</span>)</button>
+        <button id="tabGlobalRanksBtn" class="lobby-results-tab-btn">All-Time Player Ranks</button>
       </div>
 
       <!-- TAB 1: Completed Lobby Match Cards -->
@@ -744,7 +900,10 @@
   <!-- Supabase Setup & Status Info Modal -->
   <div id="supabaseInfoModal" class="modal-overlay hidden">
     <div class="podium-card glass-panel" style="max-width: 580px; text-align: left;">
-      <h2 style="font-size:1.5rem; margin-bottom:10px; color:var(--accent-cyan);">⚡ Supabase Cloud Database Setup</h2>
+      <h2 style="font-size:1.5rem; margin-bottom:10px; color:var(--accent-cyan);">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Supabase Cloud Database Setup
+      </h2>
       <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.5; margin-bottom:16px;">
         Scribble Arena uses <strong>Supabase</strong> to store active rooms, match archives, custom word packs, and global player leaderboards.
       </p>
@@ -765,21 +924,24 @@ SUPABASE_ANON_KEY=eyJhbGciOi...</pre>
     </div>
   </div>
 
-  <!-- SERVER SETTINGS MODAL (for decoupled hosting e.g. Vercel frontend + Render backend) -->
+  <!-- SERVER SETTINGS MODAL -->
   <div id="serverConfigModal" class="modal-overlay hidden">
     <div class="modal-card glass-panel" style="max-width: 500px;">
       <div class="modal-header">
-        <h3 class="modal-title">⚙️ Game Server Connection</h3>
-        <button id="closeServerConfigBtn" class="btn-icon">✕</button>
+        <h3 class="modal-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Game Server Connection
+        </h3>
+        <button id="closeServerConfigBtn" class="btn-icon">&times;</button>
       </div>
       <p style="color:var(--text-muted); font-size:0.88rem; line-height:1.5; margin-bottom:14px;">
         Scribble Arena uses <strong>Socket.IO WebSockets</strong> for synchronized multiplayer drawing, countdowns, and room state.
       </p>
 
       <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; border:1px solid var(--glass-border); margin-bottom:14px; font-size:0.83rem; line-height:1.5;">
-        <strong>💡 Deployment Guide:</strong><br>
-        • <strong>Render.com / Railway:</strong> Supports WebSockets out-of-the-box! Leave blank if deployed there.<br>
-        • <strong>Vercel Frontend:</strong> Vercel is serverless and cannot host WebSockets directly. Deploy the backend to <strong>Render</strong> and enter your Render URL below (e.g. <code style="color:var(--accent-cyan);">https://your-scribble.onrender.com</code>).
+        <strong>Deployment Guide:</strong><br>
+        &bull; <strong>Render.com / Railway:</strong> Supports WebSockets out-of-the-box! Leave blank if deployed there.<br>
+        &bull; <strong>Vercel Frontend:</strong> Vercel is serverless and cannot host WebSockets directly. Deploy the backend to <strong>Render</strong> and enter your Render URL below (e.g. <code style="color:var(--accent-cyan);">https://your-scribble.onrender.com</code>).
       </div>
 
       <div style="margin-bottom: 14px;">
@@ -790,58 +952,78 @@ SUPABASE_ANON_KEY=eyJhbGciOi...</pre>
       <div id="serverTestStatus" style="font-size:0.85rem; padding:8px 12px; border-radius:6px; margin-bottom:14px; display:none;"></div>
 
       <div style="display:flex; gap:10px;">
-        <button id="testAndSaveServerBtn" class="btn-primary" style="flex:1;">Save & Connect</button>
+        <button id="testAndSaveServerBtn" class="btn-primary" style="flex:1;">Save &amp; Connect</button>
         <button id="resetServerBtn" class="btn-ghost" style="flex:1;">Use Default Domain</button>
       </div>
     </div>
   </div>
 
-  <!-- WAYGROUND CHARACTER STUDIO MODAL -->
+  <!-- CHARACTER STUDIO MODAL -->
   <div id="avatarStudioModal" class="modal-overlay hidden">
-    <div class="wayground-studio-container glass-panel">
+    <div class="character-studio-container glass-panel">
       <!-- Studio Header -->
-      <div class="wayground-studio-header">
+      <div class="character-studio-header">
         <div class="studio-header-left">
-          <span class="studio-brand-badge">⚡ WAYGROUND STUDIO</span>
+          <span class="studio-brand-badge">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            CHARACTER STUDIO
+          </span>
           <h3 class="studio-category-title" id="studioCategoryTitle">Clothes <span class="studio-item-count" id="studioItemCount">(8 items)</span></h3>
         </div>
         <div class="studio-header-right">
-          <button id="studioHeroPresetBtn" class="btn-sm btn-subtle" title="Load Wayground Hero Preset">⭐ Hero Preset</button>
-          <button id="studioRandomBtn" class="btn-sm btn-subtle">🎲 Randomize</button>
-          <button id="studioSaveBtn" class="btn-sm btn-primary">💾 Equip & Save</button>
-          <button id="closeAvatarStudioBtn" class="btn-icon studio-close-btn" aria-label="Close Studio">✕</button>
+          <button id="studioHeroPresetBtn" class="btn-sm btn-subtle" title="Load Default Hero Preset">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Hero Preset
+          </button>
+          <button id="studioRandomBtn" class="btn-sm btn-subtle">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+            Randomize
+          </button>
+          <button id="studioSaveBtn" class="btn-sm btn-primary">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Equip &amp; Save
+          </button>
+          <button id="closeAvatarStudioBtn" class="btn-icon studio-close-btn" aria-label="Close Studio">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
       </div>
 
       <!-- Studio Body: Sidebar + Items Panel + Stage -->
-      <div class="wayground-studio-body">
-        <!-- Sidebar Navigation (Matching Wayground Image 2) -->
-        <nav class="wayground-sidebar" id="studioCategoryNav">
+      <div class="character-studio-body">
+        <!-- Sidebar Navigation -->
+        <nav class="character-sidebar" id="studioCategoryNav">
           <!-- Populated dynamically via JS: Face, Hair, Headwear, Clothes, Accessories, Backpack, Skin -->
         </nav>
 
         <!-- Center Selection Panel -->
-        <div class="wayground-items-panel">
-          <div class="wayground-items-header">
-            <span class="items-helper-text" id="studioCategoryDesc">Select an item to customize your Qbit</span>
+        <div class="character-items-panel">
+          <div class="character-items-header">
+            <span class="items-helper-text" id="studioCategoryDesc">Select an item to customize your character</span>
           </div>
-          <div class="wayground-items-grid" id="studioItemsGrid">
+          <div class="character-items-grid" id="studioItemsGrid">
             <!-- Dynamically populated item cards with live previews/icons -->
           </div>
         </div>
 
-        <!-- Right Character Stage (Matching Image 2 sci-fi hangar spotlight stage) -->
-        <div class="wayground-stage-panel">
-          <div class="stage-tag">MY QBIT</div>
+        <!-- Right Character Stage -->
+        <div class="character-stage-panel">
+          <div class="stage-tag">MY CHARACTER</div>
           <div class="stage-spotlight"></div>
           <div class="stage-avatar-display" id="studioStageAvatar">
-            <!-- Rendered Qbit Avatar -->
+            <!-- Rendered Avatar -->
           </div>
           <div class="stage-pedestal"></div>
 
           <div class="stage-quick-actions">
-            <button id="stageRandomBtn" class="btn-sm btn-subtle" title="Randomize Look">🎲 Randomize</button>
-            <button id="stageResetBtn" class="btn-sm btn-subtle" title="Default Look">🔄 Reset</button>
+            <button id="stageRandomBtn" class="btn-sm btn-subtle" title="Randomize Look">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+              Randomize
+            </button>
+            <button id="stageResetBtn" class="btn-sm btn-subtle" title="Default Look">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Reset
+            </button>
           </div>
         </div>
       </div>
@@ -849,6 +1031,6 @@ SUPABASE_ANON_KEY=eyJhbGciOi...</pre>
   </div>
 
   <!-- Client Application Modules -->
-  <script type="module" src="/js/app.js?v=5"></script>
+  <script type="module" src="/js/app.js?v=6"></script>
 </body>
 </html>

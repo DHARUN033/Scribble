@@ -1,4 +1,4 @@
-// High-Performance Drawing Canvas Engine with Bézier Smoothing & Flood Fill
+// High-Performance Drawing Canvas Engine with Bezier Smoothing & Flood Fill
 
 export class DrawingBoard {
   constructor(canvasElement, options = {}) {
@@ -174,7 +174,7 @@ export class DrawingBoard {
       this.ctx.lineCap = 'round';
       this.ctx.lineJoin = 'round';
 
-      // Quadratic Bézier curve smoothing
+      // Quadratic Bezier curve smoothing
       const midPoint = {
         x: (this.lastPoint.x + stroke.x) / 2,
         y: (this.lastPoint.y + stroke.y) / 2

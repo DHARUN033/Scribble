@@ -230,5 +230,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🚀 Scribble Arena Server running at http://localhost:${PORT}`);
+  console.log(`[Server] Scribble Arena Server running at http://localhost:${PORT}`);
 });

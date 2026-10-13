@@ -4,8 +4,9 @@ import {
   AVATAR_OPTIONS, 
   AVATAR_CATEGORIES, 
   AVATAR_ITEM_DETAILS, 
+  SVG_ICONS,
   getRandomAvatar, 
-  getWaygroundHeroAvatar, 
+  getHeroPresetAvatar, 
   renderAvatarSvg 
 } from './avatar.js';
 import { DrawingBoard } from './canvas.js';
@@ -17,7 +18,7 @@ class ScribbleApp {
     this.roomCode = null;
     this.adminKey = null;
     this.myPlayerId = null;
-    this.currentAvatar = getWaygroundHeroAvatar();
+    this.currentAvatar = getHeroPresetAvatar();
     this.activeStudioCategory = 'outfit';
     this.roomState = null;
     this.drawingBoard = null;
@@ -81,11 +82,11 @@ class ScribbleApp {
 
     if (connected) {
       const url = this.getBackendUrl();
-      headerBtn.textContent = url ? '🟢 Server: Remote' : '🟢 Server: Online';
+      headerBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="#10b981"><circle cx="12" cy="12" r="6"/></svg> ${url ? 'Server: Remote' : 'Server: Online'}`;
       headerBtn.style.color = '#34d399';
       headerBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
     } else {
-      headerBtn.textContent = '🔴 Server: Offline';
+      headerBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="#ef4444"><circle cx="12" cy="12" r="6"/></svg> Server: Offline`;
       headerBtn.style.color = '#f87171';
       headerBtn.style.borderColor = 'rgba(239, 68, 68, 0.5)';
     }
@@ -135,7 +136,7 @@ class ScribbleApp {
           statusBox.style.display = 'block';
           statusBox.style.background = 'rgba(16, 185, 129, 0.2)';
           statusBox.style.color = '#34d399';
-          statusBox.innerHTML = `✅ Saved! Reconnecting to <strong>${val}</strong>...`;
+          statusBox.innerHTML = `Saved! Reconnecting to <strong>${val}</strong>...`;
         }
       } else {
         localStorage.removeItem('scribble_server_url');
@@ -143,7 +144,7 @@ class ScribbleApp {
           statusBox.style.display = 'block';
           statusBox.style.background = 'rgba(59, 130, 246, 0.2)';
           statusBox.style.color = '#60a5fa';
-          statusBox.innerHTML = '✅ Saved! Using default host.';
+          statusBox.innerHTML = 'Saved! Using default host.';
         }
       }
 
@@ -171,7 +172,7 @@ class ScribbleApp {
     if (typeof io === 'undefined') {
       console.warn('[Socket] Socket.io client not available.');
       this.updateServerStatusUI(false, 'Socket.io client unavailable');
-      this.showServerNoticeBanner('⚠️ Socket library failed to load. Check internet connection.');
+      this.showServerNoticeBanner('Socket library failed to load. Check internet connection.');
       return;
     }
 
@@ -182,7 +183,7 @@ class ScribbleApp {
 
     if (isVercelHost && !backendUrl) {
       this.updateServerStatusUI(false, 'Vercel requires a persistent WebSocket backend');
-      this.showServerNoticeBanner('⚠️ Hosted on Vercel: Persistent WebSockets require a backend server (e.g. Render). Click ⚙️ Server Settings to connect.');
+      this.showServerNoticeBanner('Hosted on Vercel: Persistent WebSockets require a backend server (e.g. Render). Click Server Settings to connect.');
     }
 
     try {
@@ -206,9 +207,9 @@ class ScribbleApp {
         console.warn('[Socket] Connection error:', err.message);
         this.updateServerStatusUI(false, err.message);
         if (isVercelHost && !backendUrl) {
-          this.showServerNoticeBanner('⚠️ Vercel cannot run WebSockets directly. Please enter your Render backend URL in ⚙️ Server Settings.');
+          this.showServerNoticeBanner('Vercel cannot run WebSockets directly. Please enter your Render backend URL in Server Settings.');
         } else {
-          this.showServerNoticeBanner(`⚠️ Cannot reach game server (${backendUrl || 'local'}). Checking connection...`);
+          this.showServerNoticeBanner(`Cannot reach game server (${backendUrl || 'local'}). Checking connection...`);
         }
       });
 
@@ -307,14 +308,14 @@ class ScribbleApp {
     const bgmBtn = document.getElementById('bgmToggleBtn');
     bgmBtn?.addEventListener('click', () => {
       const isPlaying = soundEngine.toggleBGM();
-      bgmBtn.textContent = isPlaying ? '🎵 BGM: ON' : '🎵 BGM: OFF';
+      bgmBtn.innerHTML = `${SVG_ICONS.music} BGM: ${isPlaying ? 'ON' : 'OFF'}`;
       bgmBtn.classList.toggle('active', isPlaying);
     });
 
     const sfxBtn = document.getElementById('sfxToggleBtn');
     sfxBtn?.addEventListener('click', () => {
       soundEngine.sfxMuted = !soundEngine.sfxMuted;
-      sfxBtn.textContent = soundEngine.sfxMuted ? '🔇 SFX: OFF' : '🔊 SFX: ON';
+      sfxBtn.innerHTML = `${soundEngine.sfxMuted ? SVG_ICONS.volumeMute : SVG_ICONS.volume} SFX: ${soundEngine.sfxMuted ? 'OFF' : 'ON'}`;
       sfxBtn.classList.toggle('active', !soundEngine.sfxMuted);
     });
 
@@ -444,7 +445,7 @@ class ScribbleApp {
       this.renderAvatarPreview();
     });
 
-    // Wayground Character Studio Modal Triggers
+    // Character Studio Modal Triggers
     document.getElementById('openAvatarStudioBtn')?.addEventListener('click', () => {
       this.openAvatarStudio();
     });
@@ -458,7 +459,7 @@ class ScribbleApp {
     });
 
     document.getElementById('studioHeroPresetBtn')?.addEventListener('click', () => {
-      this.currentAvatar = getWaygroundHeroAvatar();
+      this.currentAvatar = getHeroPresetAvatar();
       this.renderStudioStage();
       this.renderStudioItemsGrid();
       this.renderAvatarPreview();
@@ -479,7 +480,7 @@ class ScribbleApp {
     });
 
     document.getElementById('stageResetBtn')?.addEventListener('click', () => {
-      this.currentAvatar = getWaygroundHeroAvatar();
+      this.currentAvatar = getHeroPresetAvatar();
       this.renderStudioStage();
       this.renderStudioItemsGrid();
       this.renderAvatarPreview();
@@ -573,7 +574,7 @@ class ScribbleApp {
         adminKey: this.adminKey
       }, (res) => {
         if (res?.success) {
-          document.getElementById('adminPauseBtn').textContent = res.isPaused ? '▶️ RESUME' : '⏸️ PAUSE';
+          document.getElementById('adminPauseBtn').innerHTML = res.isPaused ? `${SVG_ICONS.play} RESUME` : `${SVG_ICONS.pause} PAUSE`;
         }
       });
     });
@@ -729,7 +730,7 @@ class ScribbleApp {
 
     grid.innerHTML = itemList.map(itemId => {
       const isSelected = this.currentAvatar[catId] === itemId;
-      const details = detailsMap[itemId] || { name: itemId, icon: '✨' };
+      const details = detailsMap[itemId] || { name: itemId };
 
       // Render thumbnail
       let thumbHtml = '';
@@ -798,7 +799,7 @@ class ScribbleApp {
 
       if (data.configured) {
         if (btn) {
-          btn.textContent = '⚡ Supabase: Connected';
+          btn.textContent = 'Supabase: Connected';
           btn.style.borderColor = 'var(--accent-emerald)';
           btn.style.color = '#34d399';
         }
@@ -806,11 +807,11 @@ class ScribbleApp {
           statusBox.style.background = 'rgba(16, 185, 129, 0.2)';
           statusBox.style.border = '1px solid var(--accent-emerald)';
           statusBox.style.color = '#34d399';
-          statusBox.innerHTML = '✅ <strong>Connected!</strong> Active rooms, game sessions, and player leaderboards are persisting to Supabase in real-time.';
+          statusBox.innerHTML = '<strong>Connected!</strong> Active rooms, game sessions, and player leaderboards are persisting to Supabase in real-time.';
         }
       } else {
         if (btn) {
-          btn.textContent = '💾 Supabase: Local (Setup)';
+          btn.textContent = 'Supabase: Local (Setup)';
           btn.style.borderColor = 'var(--accent-amber)';
           btn.style.color = 'var(--accent-amber)';
         }
@@ -818,7 +819,7 @@ class ScribbleApp {
           statusBox.style.background = 'rgba(245, 158, 11, 0.2)';
           statusBox.style.border = '1px solid var(--accent-amber)';
           statusBox.style.color = 'var(--accent-amber)';
-          statusBox.innerHTML = '⚠️ <strong>Unconfigured</strong>: Game is running in local memory fallback mode. Add SUPABASE_URL and SUPABASE_ANON_KEY to your .env file to enable cloud persistence.';
+          statusBox.innerHTML = '<strong>Unconfigured</strong>: Game is running in local memory fallback mode. Add SUPABASE_URL and SUPABASE_ANON_KEY to your .env file to enable cloud persistence.';
         }
       }
     } catch (e) {
@@ -855,7 +856,7 @@ class ScribbleApp {
     if (!listEl) return;
 
     if (showLoading || !this.cachedLobbyResults) {
-      listEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);">🔄 Loading live lobby results...</div>';
+      listEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);">Loading live lobby results...</div>';
     }
 
     try {
@@ -880,7 +881,7 @@ class ScribbleApp {
     if (!results || results.length === 0) {
       listEl.innerHTML = `
         <div class="lobby-empty-state">
-          <div class="empty-icon">🎮</div>
+          <div class="empty-icon">${SVG_ICONS.gamepad}</div>
           <p class="empty-title">No Lobby Matches Recorded Yet</p>
           <p class="empty-desc">Once any game lobby finishes a match, the full match result and player rankings will automatically appear here!</p>
         </div>
@@ -905,10 +906,10 @@ class ScribbleApp {
 
       let podiumSummaryHtml = '';
       if (podiumList[1]) {
-        podiumSummaryHtml += `<div class="podium-summary-item"><span>🥈 2nd:</span> <strong>${this.escapeHtml(podiumList[1].name)}</strong> <span style="color:var(--accent-cyan);">(${podiumList[1].score || 0} pts)</span></div>`;
+        podiumSummaryHtml += `<div class="podium-summary-item"><span>2nd:</span> <strong>${this.escapeHtml(podiumList[1].name)}</strong> <span style="color:var(--accent-cyan);">(${podiumList[1].score || 0} pts)</span></div>`;
       }
       if (podiumList[2]) {
-        podiumSummaryHtml += `<div class="podium-summary-item"><span>🥉 3rd:</span> <strong>${this.escapeHtml(podiumList[2].name)}</strong> <span style="color:var(--accent-cyan);">(${podiumList[2].score || 0} pts)</span></div>`;
+        podiumSummaryHtml += `<div class="podium-summary-item"><span>3rd:</span> <strong>${this.escapeHtml(podiumList[2].name)}</strong> <span style="color:var(--accent-cyan);">(${podiumList[2].score || 0} pts)</span></div>`;
       }
 
       const allPlayers = Array.isArray(r.all_players) && r.all_players.length > 0 ? r.all_players : podiumList;
@@ -917,7 +918,7 @@ class ScribbleApp {
       // Build drawer rows
       let drawerRowsHtml = '';
       allPlayers.forEach((p, pIdx) => {
-        const medal = pIdx === 0 ? '🥇' : pIdx === 1 ? '🥈' : pIdx === 2 ? '🥉' : `#${pIdx + 1}`;
+        const medal = pIdx === 0 ? '1st' : pIdx === 1 ? '2nd' : pIdx === 2 ? '3rd' : `#${pIdx + 1}`;
         const teamTag = p.team && p.team !== 'auto' ? `<span class="team-badge badge-${p.team}" style="font-size:0.65rem;padding:1px 5px;margin-left:4px;">${p.team}</span>` : '';
         drawerRowsHtml += `
           <div class="lobby-player-row">
@@ -942,7 +943,7 @@ class ScribbleApp {
           <div style="display:flex;align-items:center;gap:12px;">
             <span class="lobby-time-tag">${timeAgo}</span>
             <button class="toggle-players-btn" data-target="drawer_${cardId}">
-              👥 Standings (${totalPlayers}) ▾
+              Standings (${totalPlayers})
             </button>
           </div>
         </div>
@@ -951,7 +952,7 @@ class ScribbleApp {
           <div class="lobby-winner-pill">
             <div class="lobby-winner-avatar">${renderAvatarSvg(winnerAvatar, 28)}</div>
             <div class="lobby-winner-info">
-              <span class="winner-crown-label">👑 Champion</span>
+              <span class="winner-crown-label">Champion</span>
               <span class="winner-name">${this.escapeHtml(winnerName)}</span>
             </div>
             <span class="winner-points-tag">${winnerScore} pts</span>
@@ -975,7 +976,7 @@ class ScribbleApp {
       toggleBtn?.addEventListener('click', () => {
         const isHidden = drawer.classList.contains('hidden');
         drawer.classList.toggle('hidden', !isHidden);
-        toggleBtn.textContent = isHidden ? `👥 Hide (${totalPlayers}) ▴` : `👥 Standings (${totalPlayers}) ▾`;
+        toggleBtn.textContent = isHidden ? `Hide Standings (${totalPlayers})` : `Standings (${totalPlayers})`;
       });
 
       listEl.appendChild(card);
@@ -1020,7 +1021,7 @@ class ScribbleApp {
 
       data.leaderboard.forEach((p, idx) => {
         const tr = document.createElement('tr');
-        const rankMedal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+        const rankMedal = idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `#${idx + 1}`;
         tr.innerHTML = `
           <td><strong>${rankMedal}</strong></td>
           <td>
@@ -1067,8 +1068,8 @@ class ScribbleApp {
 
   joinAsPlayer() {
     if (!this.socket || !this.socket.connected) {
-      this.showServerNoticeBanner('⚠️ Server offline: Connect your backend URL (e.g. Render) via ⚙️ Server Settings.');
-      return alert('⚠️ Not connected to the game server!\n\nIf you are on Vercel, persistent WebSockets require a backend server.\nClick "⚙️ Server Settings" in the header to enter your Render backend URL.');
+      this.showServerNoticeBanner('Server offline: Connect your backend URL (e.g. Render) via Server Settings.');
+      return alert('Not connected to the game server!\n\nIf you are on Vercel, persistent WebSockets require a backend server.\nClick "Server Settings" in the header to enter your Render backend URL.');
     }
 
     const roomCode = document.getElementById('playerRoomCode')?.value.trim().toUpperCase();
@@ -1129,15 +1130,15 @@ class ScribbleApp {
 
       this.joinAsAdmin(data.roomCode, data.adminKey);
     } catch (err) {
-      this.showServerNoticeBanner('⚠️ Backend error: Connect your backend URL via ⚙️ Server Settings.');
-      alert('Error creating room: ' + err.message + '\n\nIf hosted on Vercel, please connect your Render backend URL in ⚙️ Server Settings.');
+      this.showServerNoticeBanner('Backend error: Connect your backend URL via Server Settings.');
+      alert('Error creating room: ' + err.message + '\n\nIf hosted on Vercel, please connect your Render backend URL in Server Settings.');
     }
   }
 
   joinAsAdmin(roomCode, adminKey) {
     if (!this.socket || !this.socket.connected) {
-      this.showServerNoticeBanner('⚠️ Server offline: Connect your backend URL via ⚙️ Server Settings.');
-      return alert('⚠️ Not connected to the game server!\n\nIf you are on Vercel, click "⚙️ Server Settings" to connect your Render backend.');
+      this.showServerNoticeBanner('Server offline: Connect your backend URL via Server Settings.');
+      return alert('Not connected to the game server!\n\nIf you are on Vercel, click "Server Settings" to connect your Render backend.');
     }
 
     const cleanCode = roomCode.toUpperCase().trim();
@@ -1164,8 +1165,8 @@ class ScribbleApp {
 
   joinAsArena(roomCode) {
     if (!this.socket || !this.socket.connected) {
-      this.showServerNoticeBanner('⚠️ Server offline: Connect your backend URL via ⚙️ Server Settings.');
-      return alert('⚠️ Not connected to the game server!\n\nIf you are on Vercel, click "⚙️ Server Settings" to connect your Render backend.');
+      this.showServerNoticeBanner('Server offline: Connect your backend URL via Server Settings.');
+      return alert('Not connected to the game server!\n\nIf you are on Vercel, click "Server Settings" to connect your Render backend.');
     }
 
     const cleanCode = roomCode.toUpperCase().trim();
@@ -1190,7 +1191,7 @@ class ScribbleApp {
       soundEngine.startBGM();
       const bgmBtn = document.getElementById('bgmToggleBtn');
       if (bgmBtn) {
-        bgmBtn.textContent = '🎵 BGM: ON';
+        bgmBtn.innerHTML = `${SVG_ICONS.music} BGM: ON`;
         bgmBtn.classList.add('active');
       }
     });
@@ -1394,8 +1395,8 @@ class ScribbleApp {
       if (isMeDrawer && state.state === 'DRAWING' && state.word) {
         wordBox.innerHTML = `
           <div class="stealth-privacy-shield" id="stealthWordCard" title="Press & hold or hover to peek word (Side-view protected)">
-            <span class="stealth-unrevealed">🔒 HOLD TO PEEK [SIDE PROTECTED]</span>
-            <span class="stealth-revealed">👁️ ${state.word}</span>
+            <span class="stealth-unrevealed">${SVG_ICONS.shield} HOLD TO PEEK [SIDE PROTECTED]</span>
+            <span class="stealth-revealed">${state.word}</span>
           </div>
         `;
         const stealthEl = document.getElementById('stealthWordCard');
@@ -1435,10 +1436,10 @@ class ScribbleApp {
       drawerToolbar?.classList.remove('hidden');
       if (isLobby) {
         guesserBar?.classList.add('hidden');
-        if (wordStatus) wordStatus.textContent = `🎨 Practice Canvas (Lobby Mode) - Draw freely while waiting for Host to start!`;
+        if (wordStatus) wordStatus.textContent = 'Practice Canvas (Lobby Mode) - Draw freely while waiting for Host to start!';
       } else {
         guesserBar?.classList.add('hidden');
-        if (wordStatus) wordStatus.textContent = `🎨 It is your turn to draw! (Hold card above to peek secret word)`;
+        if (wordStatus) wordStatus.textContent = 'It is your turn to draw! (Hold card above to peek secret word)';
       }
     } else {
       drawerToolbar?.classList.add('hidden');
@@ -1446,11 +1447,11 @@ class ScribbleApp {
 
       const myPlayer = state.players.find(p => p.id === this.myPlayerId);
       if (myPlayer?.hasGuessed) {
-        if (wordStatus) wordStatus.textContent = `🎉 You guessed correctly! Enjoy watching the drawing.`;
-        if (guesserStatus) guesserStatus.textContent = `🎉 You got it right! Enjoy the show!`;
+        if (wordStatus) wordStatus.textContent = 'You guessed correctly! Enjoy watching the drawing.';
+        if (guesserStatus) guesserStatus.textContent = 'You got it right! Enjoy the show!';
       } else {
         if (wordStatus) wordStatus.textContent = `${state.currentDrawer?.name || 'Someone'} is drawing!`;
-        if (guesserStatus) guesserStatus.textContent = `Type your guess in the chat box on the right! 💡`;
+        if (guesserStatus) guesserStatus.textContent = 'Type your guess in the chat box on the right!';
       }
     }
 
@@ -1461,12 +1462,12 @@ class ScribbleApp {
     if (chatInput) {
       if (myPlayer?.hasGuessed && state.state === 'DRAWING') {
         chatInput.disabled = true;
-        chatInput.placeholder = '🎉 Word found! Chat is locked so other players can guess.';
+        chatInput.placeholder = 'Word found! Chat is locked so other players can guess.';
         chatInput.classList.add('input-locked');
         if (chatSendBtn) chatSendBtn.disabled = true;
       } else if (isMeDrawer && state.state === 'DRAWING') {
         chatInput.disabled = true;
-        chatInput.placeholder = '🎨 You are drawing! Chat is locked for drawer.';
+        chatInput.placeholder = 'You are drawing! Chat is locked for drawer.';
         chatInput.classList.add('input-locked');
         if (chatSendBtn) chatSendBtn.disabled = true;
       } else {
@@ -1510,12 +1511,12 @@ class ScribbleApp {
       btn.title = 'Hover or hold to peek at this word';
       btn.innerHTML = `
         <span class="choice-unrevealed">
-          <span style="font-size:1.15rem;margin-bottom:2px;">🔒</span>
+          <span style="display:flex;align-items:center;justify-content:center;margin-bottom:2px;">${SVG_ICONS.shield}</span>
           <span>WORD ${idx + 1}</span>
           <small style="font-size:0.72rem;color:#94a3b8;font-weight:600;margin-top:2px;">[Hover / Hold to Peek]</small>
         </span>
         <span class="choice-revealed">
-          <span style="color:var(--accent-cyan);">👁️</span>
+          <span style="color:var(--accent-cyan);display:flex;align-items:center;justify-content:center;">${SVG_ICONS.eye}</span>
           <span>${this.escapeHtml(w)}</span>
         </span>
       `;
@@ -1567,8 +1568,8 @@ class ScribbleApp {
       const card = document.createElement('div');
       card.className = `player-card ${p.id === this.roomState?.currentDrawerId ? 'is-drawer' : ''} ${p.hasGuessed ? 'has-guessed' : ''}`;
       
-      const isDrawerIcon = p.id === this.roomState?.currentDrawerId ? '🖌️ ' : '';
-      const streakIcon = p.streak > 1 ? `<span class="streak-badge">🔥${p.streak}</span>` : '';
+      const isDrawerIcon = p.id === this.roomState?.currentDrawerId ? '[Drawing] ' : '';
+      const streakIcon = p.streak > 1 ? `<span class="streak-badge">${SVG_ICONS.flame} ${p.streak}</span>` : '';
 
       card.innerHTML = `
         <div class="player-card-left">
@@ -1635,7 +1636,7 @@ class ScribbleApp {
   showCloseGuessBanner(msg) {
     const banner = document.getElementById('closeGuessAlert');
     if (!banner) return;
-    banner.textContent = `🔥 ${msg}`;
+    banner.textContent = msg;
     banner.classList.remove('hidden');
     setTimeout(() => {
       banner.classList.add('hidden');
@@ -1661,8 +1662,8 @@ class ScribbleApp {
     if (secretWordEl) {
       secretWordEl.innerHTML = `
         <div class="admin-hover-word-box stealth-privacy-shield" id="adminSecretWordCard" title="Press & hold or hover to peek word (Side-view protected)">
-          <span class="stealth-unrevealed">🔒 HOLD TO PEEK [SIDE SHIELD]</span>
-          <span class="stealth-revealed">👁️ ${state.word || '(None)'}</span>
+          <span class="stealth-unrevealed">${SVG_ICONS.shield} HOLD TO PEEK [SIDE SHIELD]</span>
+          <span class="stealth-revealed">${state.word || '(None)'}</span>
         </div>
       `;
       const adminPeekEl = document.getElementById('adminSecretWordCard');
@@ -1694,8 +1695,8 @@ class ScribbleApp {
     allPlayers.forEach(p => {
       const tr = document.createElement('tr');
       const statusPill = p.connected !== false
-        ? '<span class="status-pill-online">🟢 Online</span>'
-        : '<span class="status-pill-offline">🔴 Left</span>';
+        ? '<span class="status-pill-online">Online</span>'
+        : '<span class="status-pill-offline">Left</span>';
 
       tr.innerHTML = `
         <td>
@@ -1703,7 +1704,7 @@ class ScribbleApp {
             <div style="width:20px;height:20px;">${renderAvatarSvg(p.avatar, 20)}</div>
             <strong>${p.name}</strong>
             ${statusPill}
-            ${p.isMuted ? '🔇' : ''}
+            ${p.isMuted ? '[Muted]' : ''}
           </div>
         </td>
         <td><strong style="color:var(--accent-cyan);">${p.score}</strong></td>
@@ -1773,7 +1774,7 @@ class ScribbleApp {
           item.className = `activity-log-item ${log.type === 'JOIN' ? 'log-join' : 'log-exit'}`;
           item.innerHTML = `
             <span>
-              <strong class="${log.type === 'JOIN' ? 'log-tag-join' : 'log-tag-exit'}">${log.type === 'JOIN' ? '🟢 ENTERED' : '🔴 EXITED'}:</strong>
+              <strong class="${log.type === 'JOIN' ? 'log-tag-join' : 'log-tag-exit'}">${log.type === 'JOIN' ? 'ENTERED' : 'EXITED'}:</strong>
               ${log.name} ${log.score !== undefined ? `(${log.score} pts)` : ''}
             </span>
             <span class="log-time">${log.time}</span>
@@ -1843,7 +1844,7 @@ class ScribbleApp {
           <div style="width:36px;height:36px;">${renderAvatarSvg(p.avatar, 36)}</div>
           <div>
             <div style="font-size:1.1rem;font-weight:800;">${p.name}</div>
-            ${p.streak > 1 ? `<div style="font-size:0.8rem;color:var(--accent-amber);">🔥 ${p.streak} Streak</div>` : ''}
+            ${p.streak > 1 ? `<div style="display:flex;align-items:center;gap:4px;font-size:0.8rem;color:var(--accent-amber);">${SVG_ICONS.flame} ${p.streak} Streak</div>` : ''}
           </div>
         </div>
         <div style="font-family:var(--font-mono);font-size:1.3rem;font-weight:900;color:#fff;">${p.score}</div>
@@ -1898,7 +1899,7 @@ class ScribbleApp {
             <div class="round-score-user">
               <div class="avatar-mini">${renderAvatarSvg(s.avatar, 24)}</div>
               <span class="user-name">${s.name}</span>
-              ${s.isDrawer ? '<span class="drawer-tag">🎨 DRAWER</span>' : ''}
+              ${s.isDrawer ? '<span class="drawer-tag">DRAWER</span>' : ''}
             </div>
             <div class="pts-earned ${isPos ? 'pts-positive' : 'pts-zero'}">
               ${isPos ? `+${s.pointsEarned}` : '+0'}
@@ -1955,15 +1956,15 @@ class ScribbleApp {
 
     // Pillar 2 (Silver - Left)
     if (p2) {
-      stage.appendChild(this.createPillarEl(p2, 2, '🥈 2nd Place'));
+      stage.appendChild(this.createPillarEl(p2, 2, '2nd Place'));
     }
     // Pillar 1 (Gold - Center)
     if (p1) {
-      stage.appendChild(this.createPillarEl(p1, 1, '👑 1st Place'));
+      stage.appendChild(this.createPillarEl(p1, 1, '1st Place'));
     }
     // Pillar 3 (Bronze - Right)
     if (p3) {
-      stage.appendChild(this.createPillarEl(p3, 3, '🥉 3rd Place'));
+      stage.appendChild(this.createPillarEl(p3, 3, '3rd Place'));
     }
 
     // 4th and 5th on Row Bases
@@ -2004,7 +2005,7 @@ class ScribbleApp {
     if (!modal || !listEl) return;
 
     if (subEl) {
-      subEl.textContent = `Room ${this.roomCode || 'Match'} • ${data.allPlayers.length} Players • ${data.totalRounds || 3} Rounds Completed`;
+      subEl.textContent = `Room ${this.roomCode || 'Match'} | ${data.allPlayers.length} Players | ${data.totalRounds || 3} Rounds Completed`;
     }
 
     listEl.innerHTML = '';
@@ -2012,7 +2013,7 @@ class ScribbleApp {
       const rank = idx + 1;
       const row = document.createElement('div');
       row.className = `full-report-row ${rank <= 3 ? 'rank-' + rank : ''}`;
-      const medalIcon = rank === 1 ? '🥇 1st' : rank === 2 ? '🥈 2nd' : rank === 3 ? '🥉 3rd' : `#${rank}`;
+      const medalIcon = rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : `#${rank}`;
       row.innerHTML = `
         <span style="font-weight:800;font-family:var(--font-mono);font-size:0.95rem;">${medalIcon}</span>
         <div style="display:flex;align-items:center;gap:10px;">

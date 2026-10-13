@@ -146,7 +146,7 @@ export class GameRoom {
     this.broadcastState();
     this.broadcastChat({
       system: true,
-      text: `🟢 ${playerObj.name} joined as ${assignedRole.toUpperCase()}`
+      text: `${playerObj.name} joined as ${assignedRole.toUpperCase()}`
     });
 
     return { success: true, player: playerObj, roomCode: this.code };
@@ -173,7 +173,7 @@ export class GameRoom {
 
     this.broadcastChat({
       system: true,
-      text: `🔴 ${player.name} left the room`
+      text: `${player.name} left the room`
     });
 
     // If active drawer disconnected
@@ -308,7 +308,7 @@ export class GameRoom {
 
     this.broadcastChat({
       system: true,
-      text: `🎮 Game is starting! Round 1 of ${this.settings.rounds}.`
+      text: `Game is starting! Round 1 of ${this.settings.rounds}.`
     });
 
     setTimeout(() => {
@@ -337,7 +337,7 @@ export class GameRoom {
       }
       this.broadcastChat({
         system: true,
-        text: `🏁 Round ${this.currentRound} started!`
+        text: `Round ${this.currentRound} started!`
       });
     }
 
@@ -374,7 +374,7 @@ export class GameRoom {
 
     this.broadcastChat({
       system: true,
-      text: `🎨 ${drawer.name} is choosing a word!`
+      text: `${drawer.name} is choosing a word!`
     });
 
     this.io.to(this.code).emit('audio_cue', { sound: 'turn_start' });
@@ -435,7 +435,7 @@ export class GameRoom {
         const drawerName = this.players.get(this.currentDrawerId)?.name || 'Drawer';
         this.broadcastChat({
           system: true,
-          text: `⏰ Time's up! ${drawerName} did not pick a word in time. (0 pts)`
+          text: `Time's up! ${drawerName} did not pick a word in time. (0 pts)`
         });
         this.endTurn('Word selection timeout');
       }
@@ -546,7 +546,7 @@ export class GameRoom {
       if (cleanInput.toLowerCase() === this.currentWord.toLowerCase()) {
         this.io.to(socketId).emit('chat_message', {
           system: true,
-          text: `⚠️ You cannot write the secret word in chat!`
+          text: `You cannot write the secret word in chat!`
         });
         return;
       }
@@ -563,7 +563,7 @@ export class GameRoom {
     if (player.hasGuessed && this.state === 'DRAWING') {
       this.io.to(socketId).emit('chat_message', {
         system: true,
-        text: `🔒 You already found the word! Chat is locked so other players can guess.`
+        text: `You already found the word! Chat is locked so other players can guess.`
       });
       return;
     }
@@ -618,7 +618,7 @@ export class GameRoom {
         this.broadcastChat({
           system: true,
           highlight: 'green',
-          text: `🎉 ${player.name} guessed the word! (+${totalAward} pts)`
+          text: `${player.name} guessed the word! (+${totalAward} pts)`
         });
 
         this.broadcastState();
@@ -677,7 +677,7 @@ export class GameRoom {
 
     this.broadcastChat({
       system: true,
-      text: `🔔 Turn finished! The secret word was: "${this.currentWord}". ${reason}`
+      text: `Turn finished! The secret word was: "${this.currentWord}". ${reason}`
     });
 
     this.io.to(this.code).emit('audio_cue', { sound: 'round_end' });
@@ -737,7 +737,7 @@ export class GameRoom {
 
     this.broadcastChat({
       system: true,
-      text: `🏆 GAME OVER! 1st Place: ${podium[0]?.name || 'Nobody'} with ${podium[0]?.score || 0} pts!`
+      text: `GAME OVER! 1st Place: ${podium[0]?.name || 'Nobody'} with ${podium[0]?.score || 0} pts!`
     });
 
     // Persist match session and global hall of fame to Supabase
@@ -775,7 +775,7 @@ export class GameRoom {
     this.isPaused = !this.isPaused;
     this.broadcastChat({
       system: true,
-      text: this.isPaused ? `⏸️ Host paused the game!` : `▶️ Host resumed the game!`
+      text: this.isPaused ? `Host paused the game!` : `Host resumed the game!`
     });
     this.broadcastState();
     return { success: true, isPaused: this.isPaused };
@@ -785,7 +785,7 @@ export class GameRoom {
     if (adminKey !== this.adminKey) return { success: false, error: 'Unauthorized' };
     this.broadcastChat({
       system: true,
-      text: `⏭️ Host skipped the current turn!`
+      text: `Host skipped the current turn!`
     });
     this.endTurn('Host skipped');
     return { success: true };
@@ -795,7 +795,7 @@ export class GameRoom {
     if (adminKey !== this.adminKey) return { success: false, error: 'Unauthorized' };
     this.broadcastChat({
       system: true,
-      text: `🛑 Host ended the match early!`
+      text: `Host ended the match early!`
     });
     this.endGame();
     setTimeout(() => {
@@ -806,7 +806,7 @@ export class GameRoom {
       this.canvasStrokes = [];
       this.broadcastChat({
         system: true,
-        text: '🔄 Lobby reset. Ready for next match!'
+        text: 'Lobby reset. Ready for next match!'
       });
       this.broadcastState();
     }, 5000);
@@ -832,7 +832,7 @@ export class GameRoom {
     player.score = Math.max(0, player.score + delta);
     this.broadcastChat({
       system: true,
-      text: `⚖️ Host adjusted ${player.name}'s score by ${delta > 0 ? '+' + delta : delta} pts (New score: ${player.score})`
+      text: `Host adjusted ${player.name}'s score by ${delta > 0 ? '+' + delta : delta} pts (New score: ${player.score})`
     });
     this.broadcastState();
     return { success: true, newScore: player.score };
@@ -878,7 +878,7 @@ export class GameRoom {
 
     this.broadcastChat({
       system: true,
-      text: `⚙️ Host updated room settings!`
+      text: `Host updated room settings!`
     });
     this.broadcastState();
     return { success: true, settings: this.settings };
