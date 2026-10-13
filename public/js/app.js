@@ -34,86 +34,248 @@ class ScribbleApp {
   }
 
   init() {
-    this.initSocket();
-    this.initConfetti();
+    // 1. Bind UI events FIRST so all buttons (volume, tabs, audio) work immediately
     this.bindDOMEvents();
+    this.initConfetti();
     this.renderAvatarPreview();
     this.checkUrlParams();
+    this.initArenaRecording();
+    this.initServerSettingsUI();
+
+    // 2. Initialize networking safely
+    this.initSocket();
     this.loadPresets();
     this.checkSupabaseStatus();
     this.loadWordPacks();
-    this.initArenaRecording();
+  }
+
+  getBackendUrl() {
+    const saved = localStorage.getItem('scribble_server_url');
+    if (saved && saved.trim()) {
+      return saved.trim().replace(/\/+$/, '');
+    }
+    if (window.SCRIBBLE_SERVER_URL && window.SCRIBBLE_SERVER_URL.trim()) {
+      return window.SCRIBBLE_SERVER_URL.trim().replace(/\/+$/, '');
+    }
+    return '';
+  }
+
+  apiUrl(path) {
+    const base = this.getBackendUrl();
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    if (base) {
+      return `${base}${cleanPath}`;
+    }
+    return cleanPath;
+  }
+
+  updateServerStatusUI(connected, errorMsg = '') {
+    const headerBtn = document.getElementById('serverStatusHeaderBtn');
+    if (!headerBtn) return;
+
+    if (connected) {
+      const url = this.getBackendUrl();
+      headerBtn.textContent = url ? '🟢 Server: Remote' : '🟢 Server: Online';
+      headerBtn.style.color = '#34d399';
+      headerBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+    } else {
+      headerBtn.textContent = '🔴 Server: Offline';
+      headerBtn.style.color = '#f87171';
+      headerBtn.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+    }
+  }
+
+  showServerNoticeBanner(msg) {
+    const banner = document.getElementById('serverNoticeBanner');
+    const text = document.getElementById('serverNoticeText');
+    if (banner && text) {
+      text.textContent = msg;
+      banner.classList.remove('hidden');
+    }
+  }
+
+  hideServerNoticeBanner() {
+    const banner = document.getElementById('serverNoticeBanner');
+    if (banner) {
+      banner.classList.add('hidden');
+    }
+  }
+
+  initServerSettingsUI() {
+    const modal = document.getElementById('serverConfigModal');
+    const openBtn = document.getElementById('serverStatusHeaderBtn');
+    const bannerBtn = document.getElementById('serverConfigBannerBtn');
+    const closeBtn = document.getElementById('closeServerConfigBtn');
+    const saveBtn = document.getElementById('testAndSaveServerBtn');
+    const resetBtn = document.getElementById('resetServerBtn');
+    const input = document.getElementById('customServerUrlInput');
+    const statusBox = document.getElementById('serverTestStatus');
+
+    const openModal = () => {
+      if (input) input.value = localStorage.getItem('scribble_server_url') || '';
+      if (statusBox) statusBox.style.display = 'none';
+      modal?.classList.remove('hidden');
+    };
+
+    openBtn?.addEventListener('click', openModal);
+    bannerBtn?.addEventListener('click', openModal);
+    closeBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+
+    saveBtn?.addEventListener('click', () => {
+      const val = input ? input.value.trim().replace(/\/+$/, '') : '';
+      if (val) {
+        localStorage.setItem('scribble_server_url', val);
+        if (statusBox) {
+          statusBox.style.display = 'block';
+          statusBox.style.background = 'rgba(16, 185, 129, 0.2)';
+          statusBox.style.color = '#34d399';
+          statusBox.innerHTML = `✅ Saved! Reconnecting to <strong>${val}</strong>...`;
+        }
+      } else {
+        localStorage.removeItem('scribble_server_url');
+        if (statusBox) {
+          statusBox.style.display = 'block';
+          statusBox.style.background = 'rgba(59, 130, 246, 0.2)';
+          statusBox.style.color = '#60a5fa';
+          statusBox.innerHTML = '✅ Saved! Using default host.';
+        }
+      }
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 700);
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      localStorage.removeItem('scribble_server_url');
+      if (input) input.value = '';
+      if (statusBox) {
+        statusBox.style.display = 'block';
+        statusBox.style.background = 'rgba(59, 130, 246, 0.2)';
+        statusBox.style.color = '#60a5fa';
+        statusBox.innerHTML = 'Reset to default host. Reloading...';
+      }
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
+    });
   }
 
   initSocket() {
-    this.socket = io();
+    if (typeof io === 'undefined') {
+      console.warn('[Socket] Socket.io client not available.');
+      this.updateServerStatusUI(false, 'Socket.io client unavailable');
+      this.showServerNoticeBanner('⚠️ Socket library failed to load. Check internet connection.');
+      return;
+    }
 
-    this.socket.on('connect', () => {
-      this.myPlayerId = this.socket.id;
-      console.log('[Socket] Connected as', this.myPlayerId);
-    });
+    const backendUrl = this.getBackendUrl();
+    const isVercelHost = window.location.hostname.includes('vercel.app') || 
+                         window.location.hostname.includes('github.io') ||
+                         window.location.hostname.includes('netlify.app');
 
-    this.socket.on('room_state', (state) => {
-      this.onRoomStateUpdate(state);
-    });
+    if (isVercelHost && !backendUrl) {
+      this.updateServerStatusUI(false, 'Vercel requires a persistent WebSocket backend');
+      this.showServerNoticeBanner('⚠️ Hosted on Vercel: Persistent WebSockets require a backend server (e.g. Render). Click ⚙️ Server Settings to connect.');
+    }
 
-    this.socket.on('select_word_options', ({ options, timeout }) => {
-      this.showWordPickerModal(options, timeout);
-    });
+    try {
+      const socketOptions = {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 8,
+        reconnectionDelay: 1000
+      };
 
-    this.socket.on('timer_tick', ({ timeLeft, state }) => {
-      this.updateTimerDisplay(timeLeft, state);
-    });
+      this.socket = backendUrl ? io(backendUrl, socketOptions) : io(socketOptions);
 
-    this.socket.on('remote_stroke', (stroke) => {
-      if (this.drawingBoard) this.drawingBoard.applyStroke(stroke);
-      if (this.arenaBoard) this.arenaBoard.applyStroke(stroke);
-    });
+      this.socket.on('connect', () => {
+        this.myPlayerId = this.socket.id;
+        console.log('[Socket] Connected as', this.myPlayerId);
+        this.updateServerStatusUI(true);
+        this.hideServerNoticeBanner();
+      });
 
-    this.socket.on('canvas_clear', () => {
-      if (this.drawingBoard) this.drawingBoard.reset();
-      if (this.arenaBoard) this.arenaBoard.reset();
-    });
+      this.socket.on('connect_error', (err) => {
+        console.warn('[Socket] Connection error:', err.message);
+        this.updateServerStatusUI(false, err.message);
+        if (isVercelHost && !backendUrl) {
+          this.showServerNoticeBanner('⚠️ Vercel cannot run WebSockets directly. Please enter your Render backend URL in ⚙️ Server Settings.');
+        } else {
+          this.showServerNoticeBanner(`⚠️ Cannot reach game server (${backendUrl || 'local'}). Checking connection...`);
+        }
+      });
 
-    this.socket.on('round_end_scores', (data) => {
-      this.showRoundEndModal(data);
-    });
+      this.socket.on('disconnect', (reason) => {
+        console.warn('[Socket] Disconnected:', reason);
+        this.updateServerStatusUI(false, reason);
+      });
 
-    this.socket.on('chat_message', (msg) => {
-      this.appendChatMessage(msg);
-    });
+      this.socket.on('room_state', (state) => {
+        this.onRoomStateUpdate(state);
+      });
 
-    this.socket.on('close_guess_alert', ({ guess, message }) => {
-      this.showCloseGuessBanner(message);
-    });
+      this.socket.on('select_word_options', ({ options, timeout }) => {
+        this.showWordPickerModal(options, timeout);
+      });
 
-    this.socket.on('player_guessed_correctly', ({ playerId, playerName, pointsEarned, firstGuesser }) => {
-      if (playerId === this.myPlayerId) {
-        this.triggerConfetti(80);
-      }
-    });
+      this.socket.on('timer_tick', ({ timeLeft, state }) => {
+        this.updateTimerDisplay(timeLeft, state);
+      });
 
-    this.socket.on('audio_cue', ({ sound }) => {
-      soundEngine.playCue(sound);
-    });
+      this.socket.on('remote_stroke', (stroke) => {
+        if (this.drawingBoard) this.drawingBoard.applyStroke(stroke);
+        if (this.arenaBoard) this.arenaBoard.applyStroke(stroke);
+      });
 
-    this.socket.on('game_over_podium', (data) => {
-      this.showPodiumModal(data);
-    });
+      this.socket.on('canvas_clear', () => {
+        if (this.drawingBoard) this.drawingBoard.reset();
+        if (this.arenaBoard) this.arenaBoard.reset();
+      });
 
-    this.socket.on('kicked_by_host', ({ reason }) => {
-      alert(`You have been removed: ${reason}`);
-      window.location.reload();
-    });
+      this.socket.on('round_end_scores', (data) => {
+        this.showRoundEndModal(data);
+      });
 
-    this.socket.on('lobby_closed_by_host', ({ message }) => {
-      alert(message || 'The host has ended and closed this lobby.');
-      window.location.href = window.location.pathname;
-    });
+      this.socket.on('chat_message', (msg) => {
+        this.appendChatMessage(msg);
+      });
 
-    this.socket.on('lobby_result_updated', (data) => {
-      this.handleNewLobbyResult(data);
-    });
+      this.socket.on('close_guess_alert', ({ guess, message }) => {
+        this.showCloseGuessBanner(message);
+      });
+
+      this.socket.on('player_guessed_correctly', ({ playerId, playerName, pointsEarned, firstGuesser }) => {
+        if (playerId === this.myPlayerId) {
+          this.triggerConfetti(80);
+        }
+      });
+
+      this.socket.on('audio_cue', ({ sound }) => {
+        soundEngine.playCue(sound);
+      });
+
+      this.socket.on('game_over_podium', (data) => {
+        this.showPodiumModal(data);
+      });
+
+      this.socket.on('kicked_by_host', ({ reason }) => {
+        alert(`You have been removed: ${reason}`);
+        window.location.reload();
+      });
+
+      this.socket.on('lobby_closed_by_host', ({ message }) => {
+        alert(message || 'The host has ended and closed this lobby.');
+        window.location.href = window.location.pathname;
+      });
+
+      this.socket.on('lobby_result_updated', (data) => {
+        this.handleNewLobbyResult(data);
+      });
+    } catch (err) {
+      console.error('[Socket] Failed to initialize socket:', err);
+      this.updateServerStatusUI(false, err.message);
+    }
   }
 
   bindDOMEvents() {
@@ -456,7 +618,7 @@ class ScribbleApp {
 
   async loadPresets() {
     try {
-      const res = await fetch('/api/presets');
+      const res = await fetch(this.apiUrl('/api/presets'));
       const data = await res.json();
       if (data.success) {
         this.presets = data.presets;
@@ -480,7 +642,7 @@ class ScribbleApp {
 
   async checkSupabaseStatus() {
     try {
-      const res = await fetch('/api/supabase/status');
+      const res = await fetch(this.apiUrl('/api/supabase/status'));
       const data = await res.json();
       const btn = document.getElementById('supabaseStatusBtn');
       const statusBox = document.getElementById('supabaseConnectionStatusBox');
@@ -517,7 +679,7 @@ class ScribbleApp {
 
   async loadWordPacks() {
     try {
-      const res = await fetch('/api/wordpacks');
+      const res = await fetch(this.apiUrl('/api/wordpacks'));
       const data = await res.json();
       if (data.success && data.packs && data.packs.length > 0) {
         const row = document.getElementById('supabaseWordPacksRow');
@@ -558,7 +720,7 @@ class ScribbleApp {
     if (!name) return;
 
     try {
-      const res = await fetch('/api/wordpacks', {
+      const res = await fetch(this.apiUrl('/api/wordpacks'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -610,7 +772,7 @@ class ScribbleApp {
     }
 
     try {
-      const res = await fetch('/api/lobby-results');
+      const res = await fetch(this.apiUrl('/api/lobby-results'));
       const data = await res.json();
       const results = (data && data.results) || [];
       this.cachedLobbyResults = results;
@@ -760,7 +922,7 @@ class ScribbleApp {
 
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading All-Time Player Ranks...</td></tr>';
     try {
-      const res = await fetch('/api/leaderboard');
+      const res = await fetch(this.apiUrl('/api/leaderboard'));
       const data = await res.json();
       tbody.innerHTML = '';
 
@@ -817,6 +979,11 @@ class ScribbleApp {
   // --- JOIN FLOWS ---
 
   joinAsPlayer() {
+    if (!this.socket || !this.socket.connected) {
+      this.showServerNoticeBanner('⚠️ Server offline: Connect your backend URL (e.g. Render) via ⚙️ Server Settings.');
+      return alert('⚠️ Not connected to the game server!\n\nIf you are on Vercel, persistent WebSockets require a backend server.\nClick "⚙️ Server Settings" in the header to enter your Render backend URL.');
+    }
+
     const roomCode = document.getElementById('playerRoomCode')?.value.trim().toUpperCase();
     const name = document.getElementById('playerName')?.value.trim() || 'Player';
     const teamInput = document.querySelector('input[name="playerTeam"]:checked')?.value || 'auto';
@@ -850,7 +1017,7 @@ class ScribbleApp {
     const wordsRaw = document.getElementById('adminCustomWords')?.value || '';
 
     try {
-      const res = await fetch('/api/rooms/create', {
+      const res = await fetch(this.apiUrl('/api/rooms/create'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -869,11 +1036,17 @@ class ScribbleApp {
 
       this.joinAsAdmin(data.roomCode, data.adminKey);
     } catch (err) {
-      alert('Error creating room: ' + err.message);
+      this.showServerNoticeBanner('⚠️ Backend error: Connect your backend URL via ⚙️ Server Settings.');
+      alert('Error creating room: ' + err.message + '\n\nIf hosted on Vercel, please connect your Render backend URL in ⚙️ Server Settings.');
     }
   }
 
   joinAsAdmin(roomCode, adminKey) {
+    if (!this.socket || !this.socket.connected) {
+      this.showServerNoticeBanner('⚠️ Server offline: Connect your backend URL via ⚙️ Server Settings.');
+      return alert('⚠️ Not connected to the game server!\n\nIf you are on Vercel, click "⚙️ Server Settings" to connect your Render backend.');
+    }
+
     const cleanCode = roomCode.toUpperCase().trim();
     this.socket.emit('join_room', {
       roomCode: cleanCode,
@@ -897,6 +1070,11 @@ class ScribbleApp {
   }
 
   joinAsArena(roomCode) {
+    if (!this.socket || !this.socket.connected) {
+      this.showServerNoticeBanner('⚠️ Server offline: Connect your backend URL via ⚙️ Server Settings.');
+      return alert('⚠️ Not connected to the game server!\n\nIf you are on Vercel, click "⚙️ Server Settings" to connect your Render backend.');
+    }
+
     const cleanCode = roomCode.toUpperCase().trim();
     this.socket.emit('join_room', {
       roomCode: cleanCode,

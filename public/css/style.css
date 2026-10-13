@@ -2930,4 +2930,65 @@ body {
   margin: 0 auto;
 }
 
+/* ============================================================ */
+/* SERVER NOTICE BANNER & SERVER SETTINGS MODAL                */
+/* ============================================================ */
+.server-notice-banner {
+  background: linear-gradient(90deg, #dc2626, #d97706);
+  color: #ffffff;
+  padding: 8px 16px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 99;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  animation: slideDownNotice 0.3s ease;
+}
 
+@keyframes slideDownNotice {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.server-notice-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.server-notice-icon {
+  font-size: 1.1rem;
+}
+
+.btn-xs {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: var(--font-main);
+}
+
+.btn-outline {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: rgba(0, 0, 0, 0.65);
+  border-color: #fff;
+  transform: translateY(-1px);
+}

@@ -8,11 +8,26 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css?v=4">
-  <script src="/socket.io/socket.io.js"></script>
+  <!-- Socket.IO Client (CDN first with local server fallback) -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script>
+    if (typeof io === 'undefined') {
+      document.write('<script src="/socket.io/socket.io.js"><\/script>');
+    }
+  </script>
 </head>
 <body class="theme-dark">
   <!-- Dynamic Confetti Overlay -->
   <canvas id="confettiCanvas" class="confetti-layer"></canvas>
+
+  <!-- Live Server Status / Connection Notice Banner -->
+  <div id="serverNoticeBanner" class="server-notice-banner hidden">
+    <div class="server-notice-content">
+      <span class="server-notice-icon">⚠️</span>
+      <span id="serverNoticeText" class="server-notice-text">Connecting to Game Server...</span>
+      <button id="serverConfigBannerBtn" class="btn-xs btn-outline">⚙️ Server Settings</button>
+    </div>
+  </div>
 
   <!-- Global Navigation Header -->
   <header class="app-header">
@@ -30,6 +45,7 @@
 
     <div class="header-right">
       <div class="audio-controls">
+        <button id="serverStatusHeaderBtn" class="btn-audio" title="Server Connection Status">🟢 Server: Online</button>
         <button id="hallOfFameBtn" class="btn-audio" title="View All Lobby Results & Match Archives">📋 All Lobby Results</button>
         <button id="bgmToggleBtn" class="btn-audio" title="Toggle Upbeat Music">🎵 BGM: OFF</button>
         <button id="sfxToggleBtn" class="btn-audio" title="Toggle Sound FX">🔊 SFX: ON</button>
@@ -744,6 +760,37 @@ SUPABASE_ANON_KEY=eyJhbGciOi...</pre>
       </div>
 
       <button id="closeSupabaseInfoBtn" class="btn-primary full-width">Got It</button>
+    </div>
+  </div>
+
+  <!-- SERVER SETTINGS MODAL (for decoupled hosting e.g. Vercel frontend + Render backend) -->
+  <div id="serverConfigModal" class="modal-overlay hidden">
+    <div class="modal-card glass-panel" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙️ Game Server Connection</h3>
+        <button id="closeServerConfigBtn" class="btn-icon">✕</button>
+      </div>
+      <p style="color:var(--text-muted); font-size:0.88rem; line-height:1.5; margin-bottom:14px;">
+        Scribble Arena uses <strong>Socket.IO WebSockets</strong> for synchronized multiplayer drawing, countdowns, and room state.
+      </p>
+
+      <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; border:1px solid var(--glass-border); margin-bottom:14px; font-size:0.83rem; line-height:1.5;">
+        <strong>💡 Deployment Guide:</strong><br>
+        • <strong>Render.com / Railway:</strong> Supports WebSockets out-of-the-box! Leave blank if deployed there.<br>
+        • <strong>Vercel Frontend:</strong> Vercel is serverless and cannot host WebSockets directly. Deploy the backend to <strong>Render</strong> and enter your Render URL below (e.g. <code style="color:var(--accent-cyan);">https://your-scribble.onrender.com</code>).
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:6px;">Backend Server URL:</label>
+        <input type="text" id="customServerUrlInput" class="input-field" placeholder="https://your-app.onrender.com (or leave empty for current host)" style="width:100%;">
+      </div>
+
+      <div id="serverTestStatus" style="font-size:0.85rem; padding:8px 12px; border-radius:6px; margin-bottom:14px; display:none;"></div>
+
+      <div style="display:flex; gap:10px;">
+        <button id="testAndSaveServerBtn" class="btn-primary" style="flex:1;">Save & Connect</button>
+        <button id="resetServerBtn" class="btn-ghost" style="flex:1;">Use Default Domain</button>
+      </div>
     </div>
   </div>
 
