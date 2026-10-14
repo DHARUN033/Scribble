@@ -16,6 +16,12 @@
   * Secret word stealth protection for drawers & admins to prevent side-view screen peeking.
   * Turn scoreboards and dynamic round counters (`ROUND 1/3`, `ROUND 2/3`, `FINAL ROUND 3/3 COMPLETE`).
 
+* **Modern Fair Play Scoring System (2.0)**:
+  * **Drawer Clarity Rewards**: Drawers get maximum points (up to 425+ pts) when all players find the word; proportional moderate rewards (135 - 310 pts) when fewer players guess; 0 pts if nobody guesses.
+  * **Balanced Guesser Ladder**: Guaranteed base solve reward (+120 pts), speed bonus (up to +180 pts), lightning first-solver bonus (+35 pts), streak multipliers, and a smooth placement curve (+120 to +24 pts) ensuring 4th-7th guessers take home healthy scores (160 - 250+ pts) without steep drops.
+  * **Strict Unique Scores**: Every scoring player is guaranteed a distinct point value—no duplicate ties.
+  * **Comprehensive In-App References**: Scoring guide available directly on the landing page, in-game HUD & leaderboard, round-end scoreboard, and match reports.
+
 * **Live Chat & Guessing Engine**:
   * Instant word evaluation with fuzzy / close-guess hints ("You're close!").
   * Automatic chat lock for players who successfully guessed the word (they can see chats but cannot spoil the answer).

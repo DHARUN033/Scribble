@@ -774,61 +774,130 @@ export class GameRoom {
     db.updateRoomStatus(this.code, 'finished');
   }
 
-  calculateGuessPoints({ timeLeft, streak = 1, isFirstGuess = false, rank = 1, totalGuessers = 1, previousPoints = Infinity }) {
-    // Only the LAST correct guesser receives 50. Everyone above must receive strictly more.
-    if (totalGuessers <= 1) {
-      return 50;
-    }
-
-    if (rank === totalGuessers) {
-      return 50;
-    }
-
-    const drawTime = Math.max(1, this.settings.drawTime || 1);
+  calculateGuessPoints({ timeLeft, streak = 1, isFirstGuess = false, rank = 1, totalGuessers = 1, eligibleGuessers = 1, previousPoints = Infinity }) {
+    const drawTime = Math.max(1, this.settings.drawTime || 80);
     const timeFactor = Math.max(0, Math.min(1, (timeLeft || 0) / drawTime));
-    const rankFactor = (totalGuessers - rank) / Math.max(1, totalGuessers - 1);
-    const firstBonus = isFirstGuess ? 80 : 0;
-    const streakBonus = Math.min(90, Math.max(0, streak - 1) * 15);
 
-    let points = Math.round(60 + (rankFactor * 280) + (timeFactor * 120) + firstBonus + streakBonus);
+    // 1. Base reward: Guaranteed solid reward for discovering the secret word
+    const baseReward = 120;
 
-    // Enforce strict ladder order: each lower rank must score less than the rank above.
-    points = Math.min(points, previousPoints - 1);
+    // 2. Speed / Time bonus: Up to 180 points based on speed of solving
+    const timeBonus = Math.round(timeFactor * 180);
 
-    // Non-last guessers should never drop to 50.
-    return Math.max(51, points);
+    // 3. Smooth rank ladder decay:
+    // Avoids massive drop-offs so 4th-7th guessers still earn healthy, satisfying points.
+    // Rank 1: +120, Rank 2: +95, Rank 3: +75, Rank 4: +60, Rank 5: +48, Rank 6: +38, Rank 7+: +30
+    const rankBonuses = [120, 95, 75, 60, 48, 38, 30, 24];
+    const rankBonus = rank <= rankBonuses.length
+      ? rankBonuses[rank - 1]
+      : Math.max(15, 24 - (rank - 8) * 2);
+
+    // 4. First solver lightning bonus
+    const firstBonus = isFirstGuess ? 35 : 0;
+
+    // 5. Consecutive guess streak bonus (+15 pts per consecutive turn, max 45 pts)
+    const streakBonus = Math.min(45, Math.max(0, streak - 1) * 15);
+
+    let points = baseReward + timeBonus + rankBonus + firstBonus + streakBonus;
+
+    // 6. Enforce strict ladder order: each lower rank must score less than the rank above
+    if (previousPoints !== Infinity) {
+      points = Math.min(points, previousPoints - 3);
+    }
+
+    // 7. Dynamic guaranteed minimum floor so players never receive low points (e.g. old 50 pts)
+    const minFloor = Math.max(80, 140 - (rank - 1) * 8);
+    points = Math.max(minFloor, points);
+
+    // Final safety clamp for strict descending order
+    if (previousPoints !== Infinity && points >= previousPoints) {
+      points = Math.max(25, previousPoints - 2);
+    }
+
+    return points;
   }
 
   settleTurnScores() {
     const settledGuessers = [];
+    const usedPoints = new Set();
 
     let previousPoints = Infinity;
     const totalGuessers = this.guessHistory.length;
+    const activePlayers = this.getActivePlayers();
+    const eligibleCount = activePlayers.filter(p => p.id !== this.currentDrawerId).length;
+    const eligibleGuessers = Math.max(1, Math.max(totalGuessers, eligibleCount));
 
+    // Settle points for guessers in chronological order
     this.guessHistory.forEach((entry) => {
       const player = this.players.get(entry.playerId);
       if (!player) return;
 
-      const points = this.calculateGuessPoints({
+      let points = this.calculateGuessPoints({
         timeLeft: entry.timeLeft,
         streak: entry.streak,
         isFirstGuess: entry.rank === 1,
         rank: entry.rank,
         totalGuessers,
+        eligibleGuessers,
         previousPoints
       });
 
+      // Strict uniqueness guarantee: no two players can get the exact same points in a turn
+      while (usedPoints.has(points)) {
+        points = Math.max(1, points - 1);
+      }
+
+      usedPoints.add(points);
       previousPoints = points;
       player.turnScore = points;
       player.score += points;
       settledGuessers.push(player.id);
     });
 
+    // Reset streaks for eligible guessers who failed to guess this turn
+    activePlayers.forEach((p) => {
+      if (p.id !== this.currentDrawerId && !p.hasGuessed) {
+        p.streak = 0;
+      }
+    });
+
+    // Drawer Points:
+    // - If nobody guesses (0 correct): all players get 0 (drawer gets 0).
+    // - If all players guess (100%): drawer gets top points (up to ~425+ pts).
+    // - If only fewer players guess: moderate proportional reward based on player count + speed.
     const drawer = this.players.get(this.currentDrawerId);
     if (drawer) {
-      const drawerPoints = this.guessHistory.length > 0
-        ? Math.round(400 / Math.max(1, this.guessHistory.length))
-        : 0;
+      let drawerPoints = 0;
+
+      if (totalGuessers > 0) {
+        const guessRatio = Math.min(1.0, totalGuessers / eligibleGuessers); // 0.0 < guessRatio <= 1.0
+        const drawTime = Math.max(1, this.settings.drawTime || 80);
+
+        // Average time left among guessers (higher = drawing was clear and recognized quickly)
+        const avgTimeLeft = this.guessHistory.reduce((sum, g) => sum + (g.timeLeft || 0), 0) / totalGuessers;
+        const avgTimeFactor = Math.max(0, Math.min(1, avgTimeLeft / drawTime));
+
+        // Base clarity reward for having at least 1 person solve it
+        const baseClarity = 80;
+
+        // Proportional reward scaling with how many players found the answer
+        const ratioReward = Math.round(guessRatio * 280);
+
+        // Recognition speed bonus (up to 60 pts)
+        const speedReward = Math.round(avgTimeFactor * 60);
+
+        // Perfection bonus if all eligible guessers found the answer
+        const perfectionBonus = (totalGuessers >= eligibleGuessers && eligibleGuessers > 1) ? 35 : 0;
+
+        drawerPoints = baseClarity + ratioReward + speedReward + perfectionBonus;
+
+        // Ensure drawer points do NOT collide with any guesser's points
+        while (usedPoints.has(drawerPoints)) {
+          drawerPoints += 1;
+        }
+        usedPoints.add(drawerPoints);
+      }
+
       drawer.turnScore = (drawer.turnScore || 0) + drawerPoints;
       drawer.score += drawerPoints;
     }

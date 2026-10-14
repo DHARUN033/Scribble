@@ -64,6 +64,10 @@
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
           All Lobby Results
         </button>
+        <button id="pointSystemHeaderBtn" class="btn-audio btn-scoring-header" title="Complete Fair Play Scoring Guide">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Point System
+        </button>
         <button id="bgmToggleBtn" class="btn-audio" title="Toggle Upbeat Music">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
           BGM: OFF
@@ -101,6 +105,23 @@
           <button class="lobby-tab-btn" data-tab="tabArena">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="15" x="2" y="3" rx="2"/><polyline points="17 21 12 18 7 21"/></svg>
             Arena Display
+          </button>
+        </div>
+
+        <!-- Fair Play Point System Spotlight Banner -->
+        <div class="scoring-system-banner" id="lobbyScoringBanner">
+          <div class="scoring-banner-left">
+            <span class="scoring-pulse-badge">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Fair Scoring 2.0
+            </span>
+            <div class="scoring-banner-text">
+              <strong>Balanced Point System Active:</strong> Drawers rewarded for clarity • Smooth ladder for guessers • Zero duplicate points
+            </div>
+          </div>
+          <button id="lobbyScoringBtn" class="btn-xs btn-outline" type="button">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            How Points Work
           </button>
         </div>
 
@@ -343,7 +364,13 @@
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
               Leaderboard
             </h3>
-            <span id="playerCountBadge" class="badge">0</span>
+            <div class="panel-header-actions">
+              <button id="inGameScoringBtn" class="btn-xs btn-subtle in-game-rules-btn" title="View Scoring Rules">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Rules
+              </button>
+              <span id="playerCountBadge" class="badge">0</span>
+            </div>
           </div>
           
           <!-- Team Score Progress (If Team Mode) -->
@@ -751,6 +778,13 @@
         </div>
         <div id="roundEndFooterText" class="round-end-footer-text">Next round starting in a few seconds...</div>
       </div>
+
+      <div class="round-end-rules-hint">
+        <button id="roundEndScoringRulesBtn" class="round-end-rules-link" type="button">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          How are turn scores calculated? View scoring rules
+        </button>
+      </div>
     </div>
   </div>
 
@@ -819,6 +853,10 @@
       </div>
 
       <div class="podium-actions" style="margin-top: 20px;">
+        <button id="fullReportScoringBtn" class="btn-secondary btn-large">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Point System Guide
+        </button>
         <button id="closeFullReportBtn" class="btn-secondary btn-large">&larr; Back to Podium</button>
         <button id="fullReportLobbyBtn" class="btn-primary btn-large">Return to Lobby</button>
       </div>
@@ -1030,7 +1068,212 @@ SUPABASE_ANON_KEY=eyJhbGciOi...</pre>
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- MODAL: MODERN FAIR PLAY SCORING SYSTEM     -->
+  <!-- ========================================== -->
+  <div id="scoringRulesModal" class="modal-overlay hidden">
+    <div class="glass-panel scoring-rules-card">
+      <button id="closeScoringRulesCrossBtn" class="modal-close-cross" title="Close">&times;</button>
+
+      <div class="scoring-rules-header">
+        <div class="scoring-rules-icon">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="scoring-rules-title-wrap">
+          <span class="scoring-rules-badge">MODERN FAIR PLAY 2.0</span>
+          <h2 class="scoring-rules-title">Scribble Arena Point System</h2>
+          <p class="scoring-rules-subtitle">Balanced scoring that rewards artistic clarity and quick deduction. Strict unique points ensure zero score ties!</p>
+        </div>
+      </div>
+
+      <!-- Two Core Pillars Grid -->
+      <div class="scoring-pillars-grid">
+        
+        <!-- Pillar 1: Drawers -->
+        <div class="scoring-pillar-card drawer-pillar">
+          <div class="pillar-header">
+            <span class="pillar-icon">🎨</span>
+            <div>
+              <h3>Drawer Scoring</h3>
+              <span class="pillar-tag">Reward for Clear Art</span>
+            </div>
+          </div>
+          <p class="pillar-summary">The drawer's score is centered on <strong>how well and clearly they draw</strong>:</p>
+          <ul class="pillar-list">
+            <li>
+              <div class="pillar-item-title">
+                <span class="tier-badge tier-high">All Players Guess (100%)</span>
+                <strong>Up to 425+ pts</strong>
+              </div>
+              <p>When your drawing is recognizable and all guessers find the word, you earn maximum points with full clarity + speed + perfection bonuses!</p>
+            </li>
+            <li>
+              <div class="pillar-item-title">
+                <span class="tier-badge tier-mid">Fewer Players Guess</span>
+                <strong>Moderate (135 - 310 pts)</strong>
+              </div>
+              <p>Points scale smoothly and proportionately to the player count who solved the drawing + how quickly they got it.</p>
+            </li>
+            <li>
+              <div class="pillar-item-title">
+                <span class="tier-badge tier-zero">Nobody Guesses (0%)</span>
+                <strong>0 pts</strong>
+              </div>
+              <p>If nobody discovers the word before the timer expires, all players (including the drawer) receive 0 points.</p>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Pillar 2: Guessers -->
+        <div class="scoring-pillar-card guesser-pillar">
+          <div class="pillar-header">
+            <span class="pillar-icon">⚡</span>
+            <div>
+              <h3>Guesser Scoring</h3>
+              <span class="pillar-tag">Speed &amp; Accuracy</span>
+            </div>
+          </div>
+          <p class="pillar-summary">A smooth, fair ladder where early solvers get rewarded, but late solvers are never crushed:</p>
+          <ul class="pillar-list">
+            <li>
+              <div class="pillar-item-title">
+                <span class="tier-badge tier-base">Base Solving Reward</span>
+                <strong>+120 pts</strong>
+              </div>
+              <p>Every player who correctly guesses the secret word earns a guaranteed solid base reward.</p>
+            </li>
+            <li>
+              <div class="pillar-item-title">
+                <span class="tier-badge tier-speed">Speed / Time Bonus</span>
+                <strong>Up to +180 pts</strong>
+              </div>
+              <p>The earlier you deduce the drawing on the clock, the larger your speed bonus.</p>
+            </li>
+            <li>
+              <div class="pillar-item-title">
+                <span class="tier-badge tier-ladder">Smooth Placement Ladder</span>
+                <strong>+120 to +24 pts</strong>
+              </div>
+              <p>Rank 1 (+120 &amp; +35 1st bonus), Rank 2 (+95), Rank 3 (+75), Rank 4 (+60), Rank 5 (+48), Rank 6 (+38), Rank 7 (+30). Ranks 4-7 still take home high, rewarding scores (160 - 250+ pts)!</p>
+            </li>
+            <li>
+              <div class="pillar-item-title">
+                <span class="tier-badge tier-streak">Consecutive Streak</span>
+                <strong>+15 pts / round</strong>
+              </div>
+              <p>Guessing consecutive words in a row adds up to +45 streak bonus points.</p>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Uniqueness Guarantee Callout -->
+      <div class="scoring-uniqueness-callout">
+        <div class="uniqueness-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="uniqueness-text">
+          <strong>Strict Unique Points Guarantee:</strong> No two players ever receive the same points in a turn! Every score is mathematically differentiated, eliminating confusing ties.
+        </div>
+      </div>
+
+      <!-- Real Example 8-Player Match Table -->
+      <div class="scoring-example-wrap">
+        <div class="example-table-title">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          Live Example: 8-Player Room (7 Guessers + 1 Drawer)
+        </div>
+        <div class="example-table-scroll">
+          <table class="scoring-example-table">
+            <thead>
+              <tr>
+                <th>Role / Rank</th>
+                <th>Player Action</th>
+                <th>Time Remaining</th>
+                <th>Calculation Breakdown</th>
+                <th style="text-align:right;">Turn Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-drawer">
+                <td><span class="role-chip drawer-chip-sm">DRAWER</span></td>
+                <td>Clear Drawing (All 7 Solved)</td>
+                <td>Avg 40s (50% clock)</td>
+                <td>80 base + 280 ratio + 30 avg speed + 35 perfect</td>
+                <td class="pts-cell"><strong>+425 pts</strong></td>
+              </tr>
+              <tr class="row-guesser-1">
+                <td><span class="rank-chip rank-1-chip">1ST GUESSER</span></td>
+                <td>Lightning Fast Guess</td>
+                <td>70s left (88% clock)</td>
+                <td>120 base + 158 speed + 120 rank + 35 first</td>
+                <td class="pts-cell"><strong>+433 pts</strong></td>
+              </tr>
+              <tr>
+                <td><span class="rank-chip rank-2-chip">2ND GUESSER</span></td>
+                <td>Quick Guess</td>
+                <td>56s left (70% clock)</td>
+                <td>120 base + 126 speed + 95 rank</td>
+                <td class="pts-cell"><strong>+341 pts</strong></td>
+              </tr>
+              <tr>
+                <td><span class="rank-chip rank-3-chip">3RD GUESSER</span></td>
+                <td>Mid-round Guess</td>
+                <td>44s left (55% clock)</td>
+                <td>120 base + 99 speed + 75 rank</td>
+                <td class="pts-cell"><strong>+294 pts</strong></td>
+              </tr>
+              <tr class="row-highlight">
+                <td><span class="rank-chip">4TH GUESSER</span></td>
+                <td>Follow-up Guess</td>
+                <td>32s left (40% clock)</td>
+                <td>120 base + 72 speed + 60 rank</td>
+                <td class="pts-cell"><strong>+252 pts</strong></td>
+              </tr>
+              <tr class="row-highlight">
+                <td><span class="rank-chip">5TH GUESSER</span></td>
+                <td>Late Guess</td>
+                <td>22s left (28% clock)</td>
+                <td>120 base + 50 speed + 48 rank</td>
+                <td class="pts-cell"><strong>+218 pts</strong></td>
+              </tr>
+              <tr class="row-highlight">
+                <td><span class="rank-chip">6TH GUESSER</span></td>
+                <td>Late Guess</td>
+                <td>14s left (18% clock)</td>
+                <td>120 base + 32 speed + 38 rank</td>
+                <td class="pts-cell"><strong>+190 pts</strong></td>
+              </tr>
+              <tr class="row-highlight">
+                <td><span class="rank-chip">7TH GUESSER</span></td>
+                <td>Buzzer Beater Guess</td>
+                <td>5s left (6% clock)</td>
+                <td>120 base + 11 speed + 30 rank</td>
+                <td class="pts-cell"><strong>+161 pts</strong></td>
+              </tr>
+              <tr class="row-zero">
+                <td><span class="rank-chip rank-miss-chip">DID NOT GUESS</span></td>
+                <td>No Correct Guess</td>
+                <td>0s left</td>
+                <td>Word remained unsolved by player</td>
+                <td class="pts-cell pts-zero-cell"><strong>+0 pts</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="example-table-footer">
+          * Notice how ranks 4 through 7 receive high, rewarding points (161 - 252 pts) rather than collapsing to low numbers, and every player's points are completely unique!
+        </div>
+      </div>
+
+      <div class="scoring-rules-actions">
+        <button id="closeScoringRulesBtn" class="btn-primary btn-large full-width">Got It, Let's Play!</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Client Application Modules -->
-  <script type="module" src="/js/app.js?v=6"></script>
+  <script type="module" src="/js/app.js?v=7"></script>
 </body>
 </html>

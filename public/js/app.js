@@ -332,6 +332,23 @@ class ScribbleApp {
     document.getElementById('closeHallOfFameBtn')?.addEventListener('click', closeLobbyResults);
     document.getElementById('lobbyResultsCrossBtn')?.addEventListener('click', closeLobbyResults);
 
+    // Fair Play Scoring Rules Modal
+    const openScoringRules = () => this.openScoringRulesModal();
+    const closeScoringRules = () => this.closeScoringRulesModal();
+    document.getElementById('pointSystemHeaderBtn')?.addEventListener('click', openScoringRules);
+    document.getElementById('lobbyScoringBtn')?.addEventListener('click', openScoringRules);
+    document.getElementById('inGameScoringBtn')?.addEventListener('click', openScoringRules);
+    document.getElementById('roundEndScoringRulesBtn')?.addEventListener('click', openScoringRules);
+    document.getElementById('fullReportScoringBtn')?.addEventListener('click', openScoringRules);
+    document.getElementById('closeScoringRulesBtn')?.addEventListener('click', closeScoringRules);
+    document.getElementById('closeScoringRulesCrossBtn')?.addEventListener('click', closeScoringRules);
+
+    document.getElementById('scoringRulesModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'scoringRulesModal') {
+        closeScoringRules();
+      }
+    });
+
     document.getElementById('refreshLobbyResultsBtn')?.addEventListener('click', () => {
       this.loadLobbyResults(true);
     });
@@ -815,6 +832,17 @@ class ScribbleApp {
   }
 
 
+
+  openScoringRulesModal() {
+    const modal = document.getElementById('scoringRulesModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.scrollTop = 0;
+  }
+
+  closeScoringRulesModal() {
+    document.getElementById('scoringRulesModal')?.classList.add('hidden');
+  }
 
   openHallOfFameModal() {
     this.openLobbyResultsModal();
