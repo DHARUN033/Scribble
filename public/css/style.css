@@ -1383,8 +1383,61 @@ body {
   animation: pulseEmerald 0.5s ease-out;
 }
 
+.chat-msg-amber {
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-weight: 700;
+  font-style: normal;
+  animation: pulseAmber 0.4s ease-out;
+}
+
 .chat-msg-user {
   background: rgba(0, 0, 0, 0.25);
+}
+
+.chat-msg-close-guess {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-left: 3px solid var(--accent-amber);
+  border-radius: 4px;
+}
+
+.chat-private-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.22);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  margin-right: 5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.chat-close-pill {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.pill-very-close {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+}
+
+.pill-close {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
 }
 
 .chat-sender {
@@ -1403,6 +1456,20 @@ body {
   text-align: center;
   animation: bounceAlert 0.4s ease-out;
   flex-shrink: 0;
+}
+
+.banner-very-close {
+  background: rgba(245, 158, 11, 0.25) !important;
+  border: 1px solid #fbbf24 !important;
+  color: #fef08a !important;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+}
+
+.banner-close {
+  background: rgba(56, 189, 248, 0.2) !important;
+  border: 1px solid var(--accent-cyan) !important;
+  color: #bae6fd !important;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
 }
 
 .chat-input-form {
@@ -2616,6 +2683,18 @@ body {
   100% {
     transform: scale(1);
     background: rgba(16, 185, 129, 0.2);
+  }
+}
+
+@keyframes pulseAmber {
+  0% {
+    transform: scale(0.98);
+    background: rgba(245, 158, 11, 0.35);
+  }
+
+  100% {
+    transform: scale(1);
+    background: rgba(245, 158, 11, 0.16);
   }
 }
 

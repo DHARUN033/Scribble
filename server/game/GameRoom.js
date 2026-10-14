@@ -1,26 +1,144 @@
 import { WORD_PRESETS, MASTER_RANDOM_WORDS, cleanWordList } from './words.js';
 import { db } from '../db/supabase.js';
 
-function levenshtein(a, b) {
-  const al = a.length;
-  const bl = b.length;
+// Damerau-Levenshtein Distance (supporting substitutions, insertions, deletions, and transpositions)
+function damerauLevenshtein(a, b) {
+  const al = a.length, bl = b.length;
   if (!al) return bl;
   if (!bl) return al;
-  const matrix = Array.from({ length: al + 1 }, () => new Array(bl + 1).fill(0));
-  for (let i = 0; i <= al; i++) matrix[i][0] = i;
-  for (let j = 0; j <= bl; j++) matrix[0][j] = j;
+  const d = Array.from({ length: al + 1 }, () => new Array(bl + 1).fill(0));
+  for (let i = 0; i <= al; i++) d[i][0] = i;
+  for (let j = 0; j <= bl; j++) d[0][j] = j;
 
   for (let i = 1; i <= al; i++) {
     for (let j = 1; j <= bl; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1,
-        matrix[i][j - 1] + 1,
-        matrix[i - 1][j - 1] + cost
+      d[i][j] = Math.min(
+        d[i - 1][j] + 1,       // deletion
+        d[i][j - 1] + 1,       // insertion
+        d[i - 1][j - 1] + cost // substitution
       );
+      // transposition check (e.g. "zbera" -> "zebra")
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      }
     }
   }
-  return matrix[al][bl];
+  return d[al][bl];
+}
+
+const COMMON_SUFFIXES = new Set([
+  's', 'es', 'ed', 'ing', 'er', 'ers', 'or', 'ors', 'est',
+  'tion', 'tions', 'sion', 'sions', 'ment', 'ments',
+  'able', 'ible', 'ful', 'less', 'ly', 'al', 'ive', 'y', 'ies'
+]);
+
+// Check if two words share a common root stem with standard grammatical endings (e.g. "computing" vs "computer")
+function checkMorphologicalMatch(a, b) {
+  let prefixLen = 0;
+  while (prefixLen < a.length && prefixLen < b.length && a[prefixLen] === b[prefixLen]) {
+    prefixLen++;
+  }
+  const minLen = Math.min(a.length, b.length);
+  if (prefixLen < 4 || prefixLen < Math.floor(minLen * 0.55)) return false;
+
+  const suffixA = a.slice(prefixLen);
+  const suffixB = b.slice(prefixLen);
+
+  if (suffixA === '' && COMMON_SUFFIXES.has(suffixB)) return true;
+  if (suffixB === '' && COMMON_SUFFIXES.has(suffixA)) return true;
+  if (COMMON_SUFFIXES.has(suffixA) && COMMON_SUFFIXES.has(suffixB)) return true;
+
+  const trimmedA = suffixA.replace(/^e/, '');
+  const trimmedB = suffixB.replace(/^e/, '');
+  if ((suffixA === 'e' || suffixA === '') && COMMON_SUFFIXES.has(trimmedB)) return true;
+  if ((suffixB === 'e' || suffixB === '') && COMMON_SUFFIXES.has(trimmedA)) return true;
+  if (COMMON_SUFFIXES.has(trimmedA) && COMMON_SUFFIXES.has(trimmedB)) return true;
+
+  return false;
+}
+
+// Check partial matches on multi-word phrases (e.g. "wireless mouse" vs "mouse", "hot dog" vs "dog")
+function checkMultiWordMatch(guess, target) {
+  const gWords = guess.split(/\s+/).filter(w => w.length >= 2);
+  const tWords = target.split(/\s+/).filter(w => w.length >= 2);
+
+  if (tWords.length > 1) {
+    for (const tw of tWords) {
+      if (guess === tw) {
+        return { isClose: true, level: 'close', reason: 'partial', message: `'${guess}' is close! (Part of the secret phrase)` };
+      }
+      if (tw.length >= 4 && damerauLevenshtein(guess, tw) === 1) {
+        return { isClose: true, level: 'close', reason: 'partial', message: `'${guess}' is close! (Part of the secret phrase)` };
+      }
+    }
+  }
+
+  if (gWords.length > 1 && tWords.length === 1) {
+    if (gWords.includes(tWords[0])) {
+      return { isClose: true, level: 'close', reason: 'partial', message: `'${guess}' is close!` };
+    }
+  }
+
+  return null;
+}
+
+// Master close-match detector for typos, word forms, compounds, and multi-word parts
+function checkCloseMatch(rawGuess, rawTarget) {
+  if (!rawGuess || !rawTarget) return null;
+  const guess = rawGuess.toLowerCase().trim();
+  const target = rawTarget.toLowerCase().trim();
+  const gCompact = guess.replace(/[^a-z0-9]/g, '');
+  const tCompact = target.replace(/[^a-z0-9]/g, '');
+  if (!gCompact || !tCompact) return null;
+  if (gCompact === tCompact) return null; // exact match handled separately
+
+  const gCleanWords = guess.replace(/[^a-z0-9 ]/g, ' ').trim().replace(/\s+/g, ' ');
+  const tCleanWords = target.replace(/[^a-z0-9 ]/g, ' ').trim().replace(/\s+/g, ' ');
+
+  // 1. Multi-word phrase check (e.g. "wireless mouse" vs "mouse")
+  const multiMatch = checkMultiWordMatch(gCleanWords, tCleanWords);
+  if (multiMatch) return multiMatch;
+
+  // 2. Morphological stem / grammatical ending check (e.g. "computing" vs "computer")
+  if (checkMorphologicalMatch(gCompact, tCompact)) {
+    return { isClose: true, level: 'very_close', reason: 'stem', message: `'${rawGuess}' is very close! Check word form` };
+  }
+
+  // 3. Compound word match (e.g. "footprint" vs "foot" or "print")
+  if (tCompact.length >= 7 && gCompact.length >= 4) {
+    if (tCompact.startsWith(gCompact) || tCompact.endsWith(gCompact)) {
+      return { isClose: true, level: 'close', reason: 'compound', message: `'${rawGuess}' is close!` };
+    }
+  }
+
+  // 4. Spelling mistake / Typos check (e.g. "zebra" vs "zabra" / "zeebra", "footprint" vs "fotprint")
+  const gLen = gCompact.length;
+  const tLen = tCompact.length;
+  const lenDiff = Math.abs(gLen - tLen);
+
+  if (lenDiff <= 2) {
+    const squash = s => s.replace(/(.)\1+/g, '$1');
+    if (squash(gCompact) === squash(tCompact)) {
+      return { isClose: true, level: 'very_close', reason: 'spelling', message: `'${rawGuess}' is very close! Check spelling` };
+    }
+
+    const dist = damerauLevenshtein(gCompact, tCompact);
+    // Long words (>= 7 chars): up to 2 edits (e.g. "footprint" -> "fotprint", "fotprnt")
+    if (tLen >= 7 && dist <= 2) {
+      return { isClose: true, level: 'very_close', reason: 'spelling', message: `'${rawGuess}' is very close! Check spelling` };
+    }
+    // Medium words (>= 4 chars): 1 edit (e.g. "zebra" -> "zabra", "zbera")
+    if (tLen >= 4 && dist === 1) {
+      return { isClose: true, level: 'very_close', reason: 'spelling', message: `'${rawGuess}' is very close! Check spelling` };
+    }
+    // Short words (3 chars): only if length difference is 1 (e.g. "cat" -> "cats")
+    if (tLen === 3 && dist === 1 && lenDiff === 1) {
+      return { isClose: true, level: 'very_close', reason: 'spelling', message: `'${rawGuess}' is very close! Check spelling` };
+    }
+  }
+
+  return null;
 }
 
 export class GameRoom {
@@ -543,12 +661,16 @@ export class GameRoom {
     }
   }
 
+  checkCloseMatch(guess, target) {
+    return checkCloseMatch(guess, target);
+  }
+
   handleGuess(socketId, text) {
     const player = this.players.get(socketId);
     if (!player) return;
 
     if (player.isMuted) {
-      socket.emit('chat_message', { system: true, text: 'You are muted by the host.' });
+      this.io.to(socketId).emit('chat_message', { system: true, text: 'You are muted by the host.' });
       return;
     }
 
@@ -557,11 +679,14 @@ export class GameRoom {
 
     // If player is the drawer
     if (socketId === this.currentDrawerId) {
-      // Check if drawer accidentally wrote the word
-      if (cleanInput.toLowerCase() === this.currentWord.toLowerCase()) {
+      const isExact = cleanInput.toLowerCase().replace(/[^a-z0-9]/g, '') === this.currentWord.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const closeCheck = this.checkCloseMatch(cleanInput, this.currentWord);
+
+      // Check if drawer accidentally wrote the word or close hints
+      if (isExact || (closeCheck && closeCheck.isClose)) {
         this.io.to(socketId).emit('chat_message', {
           system: true,
-          text: `You cannot write the secret word in chat!`
+          text: `You cannot write the secret word or close hints in chat!`
         });
         return;
       }
@@ -588,8 +713,8 @@ export class GameRoom {
       const guessNorm = cleanInput.toLowerCase().replace(/[^a-z0-9]/g, '');
       const targetNorm = this.currentWord.toLowerCase().replace(/[^a-z0-9]/g, '');
 
+      // 1. Correct Guess
       if (guessNorm === targetNorm) {
-        // Correct guess!
         player.hasGuessed = true;
         player.streak += 1;
         this.guessHistory.push({
@@ -633,18 +758,42 @@ export class GameRoom {
         return;
       }
 
-      // Check for close guess (Levenshtein distance)
-      const dist = levenshtein(guessNorm, targetNorm);
-      if (dist === 1 || (dist === 2 && targetNorm.length >= 6)) {
+      // 2. Almost Matching Guess (Spelling mistake, word stem, or multi-word part)
+      // CRITICAL: Must NOT be shown to other players!
+      const closeMatch = this.checkCloseMatch(cleanInput, this.currentWord);
+      if (closeMatch && closeMatch.isClose) {
+        // Send ONLY to the player who typed it:
+        // A) Their guess displayed privately in their own chat feed
+        this.io.to(socketId).emit('chat_message', {
+          name: player.name,
+          text: cleanInput,
+          team: player.team,
+          isPrivate: true,
+          closeGuess: true,
+          level: closeMatch.level
+        });
+
+        // B) Private system alert with specific hint ("very close!" or "close!")
+        this.io.to(socketId).emit('chat_message', {
+          system: true,
+          highlight: 'amber',
+          text: closeMatch.message
+        });
+
+        // C) Top close-guess banner and audio cue
         this.io.to(socketId).emit('close_guess_alert', {
           guess: cleanInput,
-          message: `'${cleanInput}' is very close!`
+          message: closeMatch.message,
+          level: closeMatch.level
         });
         this.io.to(socketId).emit('audio_cue', { sound: 'close_guess' });
+
+        // STOP HERE: Do NOT broadcast to other players in the room!
+        return;
       }
     }
 
-    // Regular chat message broadcast
+    // Regular chat message broadcast (unrelated message, visible to all)
     this.broadcastChat({
       name: player.name,
       text: cleanInput,

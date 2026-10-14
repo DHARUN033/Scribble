@@ -22,9 +22,12 @@
   * **Strict Unique Scores**: Every scoring player is guaranteed a distinct point value—no duplicate ties.
   * **Comprehensive In-App References**: Scoring guide available directly on the landing page, in-game HUD & leaderboard, round-end scoreboard, and match reports.
 
-* **Live Chat & Guessing Engine**:
-  * Instant word evaluation with fuzzy / close-guess hints ("You're close!").
-  * Automatic chat lock for players who successfully guessed the word (they can see chats but cannot spoil the answer).
+* **Smart Close-Guess Engine & Anti-Spoil Chat Privacy**:
+  * **Typo & Spelling Detection**: Detects minor spelling mistakes (e.g. `fotprint` vs `footprint`, `zabra` / `zeebra` / `zbera` vs `zebra`) and alerts the player with `'... is very close! Check spelling'`.
+  * **Morphological Stem Matching**: Matches root stems and grammatical variations (e.g. `computing` vs `computer`, `footprints` vs `footprint`).
+  * **Multi-Word & Compound Part Detection**: Identifies when a player guesses a component word of a multi-word phrase (e.g. `mouse` for `wireless mouse`, `dog` for `hot dog`, `foot` for `footprint`).
+  * **100% Anti-Spoil Privacy**: Close-guess messages are **NEVER broadcast to other players** or spectator displays! Only the player who typed it receives private visual badges, chat feedback, and audio cues, keeping the game fair.
+  * **Automatic Chat Lock**: Players who find the word have their chat locked from writing (they can see chats but cannot spoil the answer).
 
 * **Championship Victory Podium & Full Reports**:
   * 3D Championship stage: 1st place (center gold pillar), 2nd place (silver pillar), 3rd place (bronze pillar).

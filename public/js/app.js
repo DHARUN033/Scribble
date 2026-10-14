@@ -235,8 +235,8 @@ class ScribbleApp {
         this.appendChatMessage(msg);
       });
 
-      this.socket.on('close_guess_alert', ({ guess, message }) => {
-        this.showCloseGuessBanner(message);
+      this.socket.on('close_guess_alert', ({ guess, message, level }) => {
+        this.showCloseGuessBanner(message, level);
       });
 
       this.socket.on('player_guessed_correctly', ({ playerId, playerName, pointsEarned, firstGuesser }) => {
@@ -1639,10 +1639,13 @@ class ScribbleApp {
       msgEl.className = `chat-msg chat-msg-system ${msg.highlight ? 'chat-msg-' + msg.highlight : ''}`;
       msgEl.textContent = msg.text;
     } else {
-      msgEl.className = 'chat-msg chat-msg-user';
+      msgEl.className = `chat-msg chat-msg-user ${msg.closeGuess ? 'chat-msg-close-guess' : ''}`;
       msgEl.innerHTML = `
-        <span class="chat-sender" style="color: ${msg.team === 'red' ? '#ef4444' : msg.team === 'blue' ? '#3b82f6' : 'var(--accent-cyan)'}">${msg.name}:</span>
+        <span class="chat-sender" style="color: ${msg.team === 'red' ? '#ef4444' : msg.team === 'blue' ? '#3b82f6' : 'var(--accent-cyan)'}">
+          ${msg.isPrivate ? '<span class="chat-private-badge" title="Only visible to you">PRIVATE</span>' : ''}${this.escapeHtml(msg.name)}:
+        </span>
         <span class="chat-text">${this.escapeHtml(msg.text)}</span>
+        ${msg.closeGuess ? `<span class="chat-close-pill ${msg.level === 'very_close' ? 'pill-very-close' : 'pill-close'}">${msg.level === 'very_close' ? '⚡ Very Close!' : '⚡ Close!'}</span>` : ''}
       `;
     }
 
@@ -1657,7 +1660,8 @@ class ScribbleApp {
       }
     }
 
-    if (arenaFeed) {
+    // Do NOT leak private almost-matches to spectator arena feed
+    if (arenaFeed && !msg.isPrivate) {
       const shouldStickToBottom = (arenaFeed.scrollHeight - arenaFeed.scrollTop - arenaFeed.clientHeight) < 40;
       const arenaClone = msgEl.cloneNode(true);
       arenaFeed.appendChild(arenaClone);
@@ -1670,14 +1674,16 @@ class ScribbleApp {
     }
   }
 
-  showCloseGuessBanner(msg) {
+  showCloseGuessBanner(msg, level = 'very_close') {
     const banner = document.getElementById('closeGuessAlert');
     if (!banner) return;
     banner.textContent = msg;
+    banner.className = `close-guess-banner ${level === 'very_close' ? 'banner-very-close' : 'banner-close'}`;
     banner.classList.remove('hidden');
-    setTimeout(() => {
+    if (this.closeGuessTimeout) clearTimeout(this.closeGuessTimeout);
+    this.closeGuessTimeout = setTimeout(() => {
       banner.classList.add('hidden');
-    }, 2500);
+    }, 2800);
   }
 
   escapeHtml(str) {
