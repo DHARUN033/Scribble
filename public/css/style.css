@@ -868,12 +868,14 @@ body {
 }
 
 .leaderboard-list {
-  flex: 1;
+  flex: 1 1 0%;
   overflow-y: auto;
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-height: 0;
+  scrollbar-gutter: stable;
 }
 
 .player-card {
@@ -1317,7 +1319,7 @@ body {
 }
 
 .chat-messages-container {
-  flex: 1;
+  flex: 1 1 0%;
   overflow-y: auto;
   padding: 12px;
   display: flex;
@@ -1326,6 +1328,7 @@ body {
   min-height: 0;
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
+  scroll-behavior: smooth;
 }
 
 .chat-msg {
@@ -1371,6 +1374,7 @@ body {
   font-weight: 700;
   text-align: center;
   animation: bounceAlert 0.4s ease-out;
+  flex-shrink: 0;
 }
 
 .chat-input-form {
@@ -1378,10 +1382,13 @@ body {
   padding: 10px;
   border-top: 1px solid var(--glass-border);
   gap: 8px;
+  flex-shrink: 0;
+  background: rgba(10, 14, 23, 0.6);
 }
 
 .chat-input {
   flex: 1;
+  min-width: 0;
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid var(--glass-border);
   padding: 10px 14px;
@@ -1406,6 +1413,7 @@ body {
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .chat-send-btn:hover {
@@ -1898,8 +1906,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  aspect-ratio: 16 / 10;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: calc(100vh - 210px);
+  min-height: 300px;
 }
 
 #arenaCanvas {
@@ -1909,7 +1919,7 @@ body {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  cursor: crosshair;
+  cursor: default;
 }
 
 .arena-sidebar-column {
@@ -1948,11 +1958,13 @@ body {
 }
 
 .arena-leaderboard-list {
-  flex: 1;
+  flex: 1 1 0%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-height: 0;
+  scrollbar-gutter: stable;
 }
 
 .arena-player-card {
@@ -2007,7 +2019,7 @@ body {
 }
 
 .arena-chat-feed {
-  flex: 1;
+  flex: 1 1 0%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -2233,38 +2245,40 @@ body {
   align-items: flex-end;
   justify-content: center;
   gap: 16px;
-  margin-bottom: 30px;
-  height: 220px;
+  margin-bottom: 24px;
+  min-height: 220px;
 }
 
 .podium-pillar {
   flex: 1;
-  max-width: 160px;
+  max-width: 170px;
+  min-height: 145px;
   display: flex;
   flex-direction: column;
   align-items: center;
   border-radius: var(--radius-md) var(--radius-md) 0 0;
-  padding: 16px 12px 10px;
+  padding: 16px 12px 14px;
   position: relative;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
 }
 
 .pillar-1 {
-  height: 180px;
+  min-height: 200px;
   background: linear-gradient(to top, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.4));
   border: 2px solid var(--accent-gold);
   order: 2;
 }
 
 .pillar-2 {
-  height: 140px;
+  min-height: 165px;
   background: linear-gradient(to top, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.4));
   border: 2px solid #cbd5e1;
   order: 1;
 }
 
 .pillar-3 {
-  height: 110px;
+  min-height: 145px;
   background: linear-gradient(to top, rgba(217, 119, 6, 0.2), rgba(217, 119, 6, 0.4));
   border: 2px solid #d97706;
   order: 3;
@@ -2277,19 +2291,26 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
+  max-width: 130px;
 }
 
 .podium-score {
   font-family: var(--font-mono);
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: #fff;
+  margin-top: 2px;
 }
 
 .podium-rank-tag {
-  font-size: 1.5rem;
-  margin-top: auto;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-full);
 }
 
 /* Modal Close Cross Button */
