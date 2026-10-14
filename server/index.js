@@ -22,7 +22,7 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3000;
 const roomManager = new RoomManager(io);
 
-// Enable CORS for all REST requests (e.g. if frontend is hosted on Vercel and backend on Render)
+// Enable CORS for all REST requests (e.g. if frontend and backend run on different domains/ports)
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');

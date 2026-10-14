@@ -83,11 +83,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🌐 Deploying Online (Why Render vs. Vercel)
+## 🌐 Deploying Online (Render, Cloud VPS, or Docker)
 
-> [!IMPORTANT]
-> **Why Vercel alone is not enough for Socket.IO games:**  
-> Vercel is a **serverless** platform designed for static sites and stateless functions. Real-time multiplayer drawing games require persistent, bidirectional TCP/WebSocket connections, continuous `setInterval` countdown timers, and active in-memory game state (`RoomManager`). Serverless functions freeze or terminate between requests.
+Real-time multiplayer drawing games require persistent, bidirectional TCP/WebSocket connections, continuous countdown timers, and active in-memory game state (`RoomManager`).
 
 ### 🌟 Recommended: Deploy on Render.com (100% Free & 1-Click)
 1. Push your repository to GitHub (`https://github.com/DHARUN033/Scribble.git`).
@@ -99,13 +97,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    - **Start Command**: `npm start`
 5. Click **Deploy Web Service**.
 6. Render gives you a live URL (e.g., `https://scribble-arena.onrender.com`). Both frontend and WebSockets will work seamlessly out of the box!
-
-### ⚡ Optional: Vercel Frontend + Render Backend
-If you want to host your frontend on **Vercel** (`https://your-scribble.vercel.app`):
-1. Deploy the backend to **Render** as described above.
-2. Open your Vercel deployment and click **⚙️ Server Settings** in the top navigation bar.
-3. Paste your Render backend URL (e.g., `https://scribble-arena.onrender.com`) and click **Save & Connect**.
-4. Your Vercel frontend is now connected to your persistent backend!
 
 ---
 

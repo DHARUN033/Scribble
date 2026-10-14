@@ -177,15 +177,6 @@ class ScribbleApp {
     }
 
     const backendUrl = this.getBackendUrl();
-    const isVercelHost = window.location.hostname.includes('vercel.app') || 
-                         window.location.hostname.includes('github.io') ||
-                         window.location.hostname.includes('netlify.app');
-
-    if (isVercelHost && !backendUrl) {
-      this.updateServerStatusUI(false, 'Vercel requires a persistent WebSocket backend');
-      this.showServerNoticeBanner('Hosted on Vercel: Persistent WebSockets require a backend server (e.g. Render). Click Server Settings to connect.');
-    }
-
     try {
       const socketOptions = {
         transports: ['websocket', 'polling'],
@@ -206,11 +197,7 @@ class ScribbleApp {
       this.socket.on('connect_error', (err) => {
         console.warn('[Socket] Connection error:', err.message);
         this.updateServerStatusUI(false, err.message);
-        if (isVercelHost && !backendUrl) {
-          this.showServerNoticeBanner('Vercel cannot run WebSockets directly. Please enter your Render backend URL in Server Settings.');
-        } else {
-          this.showServerNoticeBanner(`Cannot reach game server (${backendUrl || 'local'}). Checking connection...`);
-        }
+        this.showServerNoticeBanner(`Cannot reach game server (${backendUrl || 'local'}). Checking connection...`);
       });
 
       this.socket.on('disconnect', (reason) => {
@@ -1068,8 +1055,8 @@ class ScribbleApp {
 
   joinAsPlayer() {
     if (!this.socket || !this.socket.connected) {
-      this.showServerNoticeBanner('Server offline: Connect your backend URL (e.g. Render) via Server Settings.');
-      return alert('Not connected to the game server!\n\nIf you are on Vercel, persistent WebSockets require a backend server.\nClick "Server Settings" in the header to enter your Render backend URL.');
+      this.showServerNoticeBanner('Server offline: Please check your game server connection.');
+      return alert('Not connected to the game server!\nPlease ensure the game server is running.');
     }
 
     const roomCode = document.getElementById('playerRoomCode')?.value.trim().toUpperCase();
@@ -1130,15 +1117,15 @@ class ScribbleApp {
 
       this.joinAsAdmin(data.roomCode, data.adminKey);
     } catch (err) {
-      this.showServerNoticeBanner('Backend error: Connect your backend URL via Server Settings.');
-      alert('Error creating room: ' + err.message + '\n\nIf hosted on Vercel, please connect your Render backend URL in Server Settings.');
+      this.showServerNoticeBanner('Backend error: Could not reach game server.');
+      alert('Error creating room: ' + err.message);
     }
   }
 
   joinAsAdmin(roomCode, adminKey) {
     if (!this.socket || !this.socket.connected) {
-      this.showServerNoticeBanner('Server offline: Connect your backend URL via Server Settings.');
-      return alert('Not connected to the game server!\n\nIf you are on Vercel, click "Server Settings" to connect your Render backend.');
+      this.showServerNoticeBanner('Server offline: Could not connect to game server.');
+      return alert('Not connected to the game server!\nPlease ensure the game server is running.');
     }
 
     const cleanCode = roomCode.toUpperCase().trim();
@@ -1165,8 +1152,8 @@ class ScribbleApp {
 
   joinAsArena(roomCode) {
     if (!this.socket || !this.socket.connected) {
-      this.showServerNoticeBanner('Server offline: Connect your backend URL via Server Settings.');
-      return alert('Not connected to the game server!\n\nIf you are on Vercel, click "Server Settings" to connect your Render backend.');
+      this.showServerNoticeBanner('Server offline: Could not connect to game server.');
+      return alert('Not connected to the game server!\nPlease ensure the game server is running.');
     }
 
     const cleanCode = roomCode.toUpperCase().trim();
