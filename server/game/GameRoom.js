@@ -155,7 +155,8 @@ export class GameRoom {
       hintCount: 2,
       gameMode: 'ffa', // 'ffa' or 'team'
       wordMode: 'random', // 'random' (automatic) or 'custom' (admin entered)
-      customWords: []
+      customWords: [],
+      privateChat: false // When true, typed words in chat show to sender only
     };
 
     this.state = 'LOBBY'; // LOBBY, STARTING, SELECTING_WORD, DRAWING, ROUND_END, GAME_OVER, PAUSED
@@ -356,7 +357,8 @@ export class GameRoom {
         settings: {
           drawTime: this.settings.drawTime,
           rounds: this.settings.rounds,
-          customWordsCount: this.settings.customWords.length
+          customWordsCount: this.settings.customWords.length,
+          privateChat: !!this.settings.privateChat
         },
         currentDrawerId: this.currentDrawerId,
         currentDrawer: this.players.get(this.currentDrawerId) || null,
@@ -690,12 +692,22 @@ export class GameRoom {
         });
         return;
       }
-      this.broadcastChat({
-        name: player.name,
-        text: cleanInput,
-        color: '#f59e0b',
-        team: player.team
-      });
+      if (this.settings.privateChat) {
+        this.io.to(socketId).emit('chat_message', {
+          name: player.name,
+          text: cleanInput,
+          color: '#f59e0b',
+          team: player.team,
+          isPrivate: true
+        });
+      } else {
+        this.broadcastChat({
+          name: player.name,
+          text: cleanInput,
+          color: '#f59e0b',
+          team: player.team
+        });
+      }
       return;
     }
 
@@ -737,6 +749,14 @@ export class GameRoom {
 
         this.io.to(socketId).emit('audio_cue', { sound: 'correct_guess' });
         this.io.to(this.code).emit('audio_cue', { sound: 'guess_bell' });
+
+        // Show their own typed guess in their own chat feed privately
+        this.io.to(socketId).emit('chat_message', {
+          name: player.name,
+          text: cleanInput,
+          team: player.team,
+          isPrivate: true
+        });
 
         this.broadcastChat({
           system: true,
@@ -793,12 +813,23 @@ export class GameRoom {
       }
     }
 
-    // Regular chat message broadcast (unrelated message, visible to all)
-    this.broadcastChat({
-      name: player.name,
-      text: cleanInput,
-      team: player.team
-    });
+    // Regular chat message broadcast (or incorrect guess)
+    if (this.settings.privateChat) {
+      // Admin enabled private chat: show to themselves only!
+      this.io.to(socketId).emit('chat_message', {
+        name: player.name,
+        text: cleanInput,
+        team: player.team,
+        isPrivate: true
+      });
+    } else {
+      // Disabled: display to all players
+      this.broadcastChat({
+        name: player.name,
+        text: cleanInput,
+        team: player.team
+      });
+    }
   }
 
   endTurn(reason = '') {
@@ -1162,6 +1193,28 @@ export class GameRoom {
     return { success: true };
   }
 
+  togglePrivateChat(adminKey, forceValue = null) {
+    if (adminKey !== this.adminKey) return { success: false, error: 'Unauthorized' };
+
+    if (typeof forceValue === 'boolean') {
+      this.settings.privateChat = forceValue;
+    } else {
+      this.settings.privateChat = !this.settings.privateChat;
+    }
+
+    const isEnabled = this.settings.privateChat;
+    this.broadcastChat({
+      system: true,
+      highlight: isEnabled ? 'amber' : 'green',
+      text: isEnabled
+        ? '🔒 Host enabled Private Chat mode: typed words and guesses are now visible only to yourself.'
+        : '🌐 Host disabled Private Chat mode: chat messages and guesses are now visible to all players.'
+    });
+
+    this.broadcastState();
+    return { success: true, privateChat: this.settings.privateChat };
+  }
+
   updateSettings(adminKey, newSettings) {
     if (adminKey !== this.adminKey) return { success: false, error: 'Unauthorized' };
 
@@ -1174,6 +1227,9 @@ export class GameRoom {
     }
     if (typeof newSettings.revealWordToAdmin === 'boolean') {
       this.settings.revealWordToAdmin = newSettings.revealWordToAdmin;
+    }
+    if (typeof newSettings.privateChat === 'boolean') {
+      this.settings.privateChat = newSettings.privateChat;
     }
 
     this.broadcastChat({

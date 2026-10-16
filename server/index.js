@@ -223,6 +223,13 @@ io.on('connection', (socket) => {
     if (callback) callback(result);
   });
 
+  socket.on('admin_toggle_chat', ({ roomCode, adminKey, enabled }, callback) => {
+    const room = roomManager.getRoom(roomCode);
+    if (!room) return callback && callback({ success: false, error: 'Room not found' });
+    const result = room.togglePrivateChat(adminKey, enabled);
+    if (callback) callback(result);
+  });
+
   socket.on('disconnect', () => {
     console.log(`[Socket] Disconnected: ${socket.id}`);
     roomManager.handleDisconnect(socket.id);

@@ -291,26 +291,71 @@ class ScribbleApp {
       }
     });
 
-    // Audio Controls
-    const bgmBtn = document.getElementById('bgmToggleBtn');
-    bgmBtn?.addEventListener('click', () => {
-      const isPlaying = soundEngine.toggleBGM();
-      bgmBtn.innerHTML = `${SVG_ICONS.music} BGM: ${isPlaying ? 'ON' : 'OFF'}`;
-      bgmBtn.classList.toggle('active', isPlaying);
-    });
+    // Audio Controls (Synchronized across Header and Settings Modal)
+    const updateAudioControlsUI = () => {
+      const isBgmPlaying = !!soundEngine.bgmPlaying;
+      const isSfxMuted = !!soundEngine.sfxMuted;
+      const sfxVol = soundEngine.sfxVolume ?? 0.7;
 
-    const sfxBtn = document.getElementById('sfxToggleBtn');
-    sfxBtn?.addEventListener('click', () => {
+      const bgmBtn = document.getElementById('bgmToggleBtn');
+      if (bgmBtn) {
+        bgmBtn.innerHTML = `${SVG_ICONS.music} BGM: ${isBgmPlaying ? 'ON' : 'OFF'}`;
+        bgmBtn.classList.toggle('active', isBgmPlaying);
+      }
+
+      const sfxBtn = document.getElementById('sfxToggleBtn');
+      if (sfxBtn) {
+        sfxBtn.innerHTML = `${isSfxMuted ? SVG_ICONS.volumeMute : SVG_ICONS.volume} SFX: ${isSfxMuted ? 'OFF' : 'ON'}`;
+        sfxBtn.classList.toggle('active', !isSfxMuted);
+      }
+
+      const settingsBgmBtn = document.getElementById('settingsBgmToggleBtn');
+      if (settingsBgmBtn) {
+        settingsBgmBtn.textContent = `♫ BGM: ${isBgmPlaying ? 'ON' : 'OFF'}`;
+        settingsBgmBtn.classList.toggle('active', isBgmPlaying);
+      }
+
+      const settingsSfxBtn = document.getElementById('settingsSfxToggleBtn');
+      if (settingsSfxBtn) {
+        settingsSfxBtn.textContent = `${isSfxMuted ? '🔇' : '🔊'} SFX: ${isSfxMuted ? 'OFF' : 'ON'}`;
+        settingsSfxBtn.classList.toggle('active', !isSfxMuted);
+      }
+
+      const volPctEl = document.getElementById('settingsVolumePct');
+      if (volPctEl) {
+        volPctEl.textContent = `${Math.round(sfxVol * 100)}%`;
+      }
+
+      const settingsVolInput = document.getElementById('settingsMasterVolume');
+      if (settingsVolInput && document.activeElement !== settingsVolInput) {
+        settingsVolInput.value = sfxVol;
+      }
+    };
+
+    const onToggleBgm = () => {
+      soundEngine.toggleBGM();
+      updateAudioControlsUI();
+    };
+
+    const onToggleSfx = () => {
       soundEngine.sfxMuted = !soundEngine.sfxMuted;
-      sfxBtn.innerHTML = `${soundEngine.sfxMuted ? SVG_ICONS.volumeMute : SVG_ICONS.volume} SFX: ${soundEngine.sfxMuted ? 'OFF' : 'ON'}`;
-      sfxBtn.classList.toggle('active', !soundEngine.sfxMuted);
-    });
+      updateAudioControlsUI();
+    };
 
-    const masterVol = document.getElementById('masterVolume');
-    masterVol?.addEventListener('input', (e) => {
-      soundEngine.setSfxVolume(e.target.value);
-      soundEngine.setBgmVolume(e.target.value * 0.4);
-    });
+    const onVolumeChange = (val) => {
+      soundEngine.setSfxVolume(val);
+      soundEngine.setBgmVolume(val * 0.4);
+      updateAudioControlsUI();
+    };
+
+    document.getElementById('bgmToggleBtn')?.addEventListener('click', onToggleBgm);
+    document.getElementById('settingsBgmToggleBtn')?.addEventListener('click', onToggleBgm);
+
+    document.getElementById('sfxToggleBtn')?.addEventListener('click', onToggleSfx);
+    document.getElementById('settingsSfxToggleBtn')?.addEventListener('click', onToggleSfx);
+
+    document.getElementById('masterVolume')?.addEventListener('input', (e) => onVolumeChange(e.target.value));
+    document.getElementById('settingsMasterVolume')?.addEventListener('input', (e) => onVolumeChange(e.target.value));
 
     // Supabase Status Modal
     document.getElementById('supabaseStatusBtn')?.addEventListener('click', () => {
@@ -332,20 +377,122 @@ class ScribbleApp {
     document.getElementById('closeHallOfFameBtn')?.addEventListener('click', closeLobbyResults);
     document.getElementById('lobbyResultsCrossBtn')?.addEventListener('click', closeLobbyResults);
 
-    // Fair Play Scoring Rules Modal
+    // Fair Play Scoring Rules Modal (opened via top header button)
     const openScoringRules = () => this.openScoringRulesModal();
     const closeScoringRules = () => this.closeScoringRulesModal();
     document.getElementById('pointSystemHeaderBtn')?.addEventListener('click', openScoringRules);
-    document.getElementById('lobbyScoringBtn')?.addEventListener('click', openScoringRules);
-    document.getElementById('inGameScoringBtn')?.addEventListener('click', openScoringRules);
-    document.getElementById('roundEndScoringRulesBtn')?.addEventListener('click', openScoringRules);
-    document.getElementById('fullReportScoringBtn')?.addEventListener('click', openScoringRules);
     document.getElementById('closeScoringRulesBtn')?.addEventListener('click', closeScoringRules);
     document.getElementById('closeScoringRulesCrossBtn')?.addEventListener('click', closeScoringRules);
 
     document.getElementById('scoringRulesModal')?.addEventListener('click', (e) => {
       if (e.target.id === 'scoringRulesModal') {
         closeScoringRules();
+      }
+    });
+
+    // Settings Modal (Unified Settings for all pages & Host Control)
+    const openSettings = (tab) => this.openSettingsModal(tab);
+    const closeSettings = () => this.closeSettingsModal();
+
+    document.getElementById('settingsHeaderBtn')?.addEventListener('click', () => openSettings());
+    document.getElementById('adminSettingsBtn')?.addEventListener('click', () => openSettings('tabSettingsRoom'));
+    document.getElementById('adminOpenSettingsCardBtn')?.addEventListener('click', () => openSettings('tabSettingsRoom'));
+    document.getElementById('adminOpenSettingsBtn2')?.addEventListener('click', () => openSettings('tabSettingsRoom'));
+
+    document.getElementById('closeSettingsBtn')?.addEventListener('click', closeSettings);
+    document.getElementById('closeSettingsCrossBtn')?.addEventListener('click', closeSettings);
+    document.getElementById('settingsModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'settingsModal') closeSettings();
+    });
+
+    // Settings Tab Switching
+    document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-settings-tab');
+        this.switchSettingsTab(tabId);
+      });
+    });
+
+    // Settings Room Chat Visibility Controls
+    document.getElementById('settingsSetPublicBtn')?.addEventListener('click', () => {
+      this.socket.emit('admin_toggle_chat', {
+        roomCode: this.roomCode,
+        adminKey: this.adminKey,
+        enabled: false
+      }, (res) => {
+        if (res?.success) {
+          this.syncSettingsModalChat(false);
+        } else {
+          alert(res?.error || 'Could not change chat visibility');
+        }
+      });
+    });
+
+    document.getElementById('settingsSetPrivateBtn')?.addEventListener('click', () => {
+      this.socket.emit('admin_toggle_chat', {
+        roomCode: this.roomCode,
+        adminKey: this.adminKey,
+        enabled: true
+      }, (res) => {
+        if (res?.success) {
+          this.syncSettingsModalChat(true);
+        } else {
+          alert(res?.error || 'Could not change chat visibility');
+        }
+      });
+    });
+
+    // Settings Room Rules Save
+    document.getElementById('settingsSaveRulesBtn')?.addEventListener('click', () => {
+      const rounds = parseInt(document.getElementById('settingsLiveRounds')?.value, 10);
+      const drawTime = parseInt(document.getElementById('settingsLiveDrawTime')?.value, 10);
+      if (isNaN(rounds) || rounds < 1 || rounds > 10) return alert('Rounds must be between 1 and 10');
+      if (isNaN(drawTime) || drawTime < 30 || drawTime > 180) return alert('Draw time must be between 30 and 180 seconds');
+
+      this.socket.emit('admin_update_settings', {
+        roomCode: this.roomCode,
+        adminKey: this.adminKey,
+        settings: { rounds, drawTime }
+      }, (res) => {
+        if (res?.success) {
+          alert('Room rules updated successfully!');
+        } else {
+          alert(res?.error || 'Could not update room rules');
+        }
+      });
+    });
+
+    // Settings Word Pool Save
+    document.getElementById('settingsSaveWordsBtn')?.addEventListener('click', () => {
+      const words = (document.getElementById('settingsLiveWordList')?.value || '').trim();
+      const wordMode = words.length > 0 ? 'custom' : 'random';
+      this.socket.emit('admin_update_settings', {
+        roomCode: this.roomCode,
+        adminKey: this.adminKey,
+        settings: { 
+          wordMode: wordMode,
+          customWords: words 
+        }
+      }, (res) => {
+        if (res?.success) {
+          alert(wordMode === 'custom' ? 'Custom words updated successfully!' : 'Switched to automatic Random Words!');
+        } else {
+          alert(res?.error || 'Could not update word pool');
+        }
+      });
+    });
+
+    // Settings Open Arena Display Link
+    document.getElementById('settingsOpenArenaBtn')?.addEventListener('click', () => {
+      const url = `${window.location.origin}?room=${this.roomCode}&view=arena`;
+      window.open(url, '_blank');
+    });
+
+    // Settings Reveal Word to Host Toggle
+    document.getElementById('settingsRevealWordToggle')?.addEventListener('change', (e) => {
+      const secretBox = document.querySelector('.secret-word-display-box');
+      if (secretBox) {
+        secretBox.style.display = e.target.checked ? 'block' : 'none';
       }
     });
 
@@ -569,6 +716,36 @@ class ScribbleApp {
         adminKey: this.adminKey
       }, (res) => {
         if (!res?.success) alert(res?.error || 'Failed to start game');
+      });
+    });
+
+    // Admin Chat Visibility Toggle
+    document.getElementById('adminToggleChatBtn')?.addEventListener('click', () => {
+      this.socket.emit('admin_toggle_chat', {
+        roomCode: this.roomCode,
+        adminKey: this.adminKey
+      }, (res) => {
+        if (!res?.success) alert(res?.error || 'Could not toggle chat mode');
+      });
+    });
+
+    document.getElementById('adminEnablePrivateChatBtn')?.addEventListener('click', () => {
+      this.socket.emit('admin_toggle_chat', {
+        roomCode: this.roomCode,
+        adminKey: this.adminKey,
+        enabled: true
+      }, (res) => {
+        if (!res?.success) alert(res?.error || 'Could not enable private chat');
+      });
+    });
+
+    document.getElementById('adminDisablePrivateChatBtn')?.addEventListener('click', () => {
+      this.socket.emit('admin_toggle_chat', {
+        roomCode: this.roomCode,
+        adminKey: this.adminKey,
+        enabled: false
+      }, (res) => {
+        if (!res?.success) alert(res?.error || 'Could not disable private chat');
       });
     });
 
@@ -842,6 +1019,127 @@ class ScribbleApp {
 
   closeScoringRulesModal() {
     document.getElementById('scoringRulesModal')?.classList.add('hidden');
+  }
+
+  openSettingsModal(preferredTab = null) {
+    const modal = document.getElementById('settingsModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.scrollTop = 0;
+
+    // Show/hide Room Settings tab button based on whether user is Host/Admin
+    const tabRoomBtn = document.getElementById('settingsTabRoomBtn');
+    const isAdmin = this.currentRole === 'admin';
+    if (tabRoomBtn) {
+      tabRoomBtn.style.display = isAdmin ? 'flex' : 'none';
+    }
+
+    // Determine target tab to open
+    let targetTab = preferredTab;
+    if (!targetTab) {
+      targetTab = isAdmin ? 'tabSettingsRoom' : 'tabSettingsAudio';
+    }
+    if (!isAdmin && targetTab === 'tabSettingsRoom') {
+      targetTab = 'tabSettingsAudio';
+    }
+
+    this.switchSettingsTab(targetTab);
+
+    // Sync audio states
+    const isBgmPlaying = !!soundEngine.bgmPlaying;
+    const isSfxMuted = !!soundEngine.sfxMuted;
+    const sfxVol = soundEngine.sfxVolume ?? 0.7;
+
+    const settingsBgmBtn = document.getElementById('settingsBgmToggleBtn');
+    if (settingsBgmBtn) {
+      settingsBgmBtn.textContent = `♫ BGM: ${isBgmPlaying ? 'ON' : 'OFF'}`;
+      settingsBgmBtn.classList.toggle('active', isBgmPlaying);
+    }
+
+    const settingsSfxBtn = document.getElementById('settingsSfxToggleBtn');
+    if (settingsSfxBtn) {
+      settingsSfxBtn.textContent = `${isSfxMuted ? '🔇' : '🔊'} SFX: ${isSfxMuted ? 'OFF' : 'ON'}`;
+      settingsSfxBtn.classList.toggle('active', !isSfxMuted);
+    }
+
+    const volPctEl = document.getElementById('settingsVolumePct');
+    if (volPctEl) {
+      volPctEl.textContent = `${Math.round(sfxVol * 100)}%`;
+    }
+
+    const settingsVolInput = document.getElementById('settingsMasterVolume');
+    if (settingsVolInput) {
+      settingsVolInput.value = sfxVol;
+    }
+
+    // Sync room state into inputs
+    if (this.roomState) {
+      this.syncSettingsModalRoom(this.roomState);
+    }
+  }
+
+  closeSettingsModal() {
+    document.getElementById('settingsModal')?.classList.add('hidden');
+  }
+
+  switchSettingsTab(tabId) {
+    document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-settings-tab') === tabId);
+    });
+
+    document.querySelectorAll('.settings-tab-content').forEach(content => {
+      content.classList.toggle('active', content.id === tabId);
+    });
+  }
+
+  syncSettingsModalChat(isPrivate) {
+    const badge = document.getElementById('settingsChatStatusBadge');
+    if (badge) {
+      badge.className = isPrivate ? 'badge badge-warning' : 'badge badge-primary';
+      badge.textContent = isPrivate ? 'CHAT: PRIVATE (SELF ONLY)' : 'CHAT: PUBLIC (ALL)';
+    }
+
+    const pubCard = document.getElementById('settingsChoicePublic');
+    const privCard = document.getElementById('settingsChoicePrivate');
+    if (pubCard) pubCard.classList.toggle('active', !isPrivate);
+    if (privCard) privCard.classList.toggle('active', isPrivate);
+
+    const adminChatBadge = document.getElementById('adminChatModeBadge');
+    if (adminChatBadge) {
+      adminChatBadge.className = isPrivate ? 'badge badge-warning' : 'badge badge-primary';
+      adminChatBadge.textContent = isPrivate ? 'CHAT: PRIVATE (SELF ONLY)' : 'CHAT: PUBLIC (ALL)';
+    }
+
+    const summaryChatBadge = document.getElementById('adminSummaryChatModeBadge');
+    if (summaryChatBadge) {
+      summaryChatBadge.textContent = isPrivate ? 'Chat: Private' : 'Chat: Public';
+      summaryChatBadge.className = isPrivate ? 'badge badge-warning' : 'badge badge-primary';
+    }
+  }
+
+  syncSettingsModalRoom(state) {
+    if (!state || !state.settings) return;
+    const isPrivateChat = !!state.settings.privateChat;
+    this.syncSettingsModalChat(isPrivateChat);
+
+    const roundsInput = document.getElementById('settingsLiveRounds');
+    if (roundsInput && document.activeElement !== roundsInput) {
+      roundsInput.value = state.settings.rounds || 3;
+    }
+
+    const drawTimeInput = document.getElementById('settingsLiveDrawTime');
+    if (drawTimeInput && document.activeElement !== drawTimeInput) {
+      drawTimeInput.value = state.settings.drawTime || 80;
+    }
+
+    const wordsTextarea = document.getElementById('settingsLiveWordList');
+    if (wordsTextarea && document.activeElement !== wordsTextarea) {
+      if (Array.isArray(state.settings.customWords)) {
+        wordsTextarea.value = state.settings.customWords.join(', ');
+      } else if (typeof state.settings.customWords === 'string') {
+        wordsTextarea.value = state.settings.customWords;
+      }
+    }
   }
 
   openHallOfFameModal() {
@@ -1119,6 +1417,8 @@ class ScribbleApp {
     const gameMode = document.querySelector('input[name="adminGameMode"]:checked')?.value || 'ffa';
     const wordMode = document.querySelector('input[name="adminWordMode"]:checked')?.value || 'random';
     const wordsRaw = wordMode === 'custom' ? (document.getElementById('adminCustomWords')?.value || '') : '';
+    const chatMode = document.querySelector('input[name="adminChatMode"]:checked')?.value || 'public';
+    const privateChat = chatMode === 'private';
 
     if (wordMode === 'custom' && !wordsRaw.trim()) {
       return alert('Please enter your custom words in the box, or select "Random Words (Automatic)".');
@@ -1134,7 +1434,8 @@ class ScribbleApp {
             drawTime,
             gameMode,
             wordMode,
-            customWords: wordsRaw
+            customWords: wordsRaw,
+            privateChat
           }
         })
       });
@@ -1482,6 +1783,24 @@ class ScribbleApp {
 
     // Lock chat writing for guessed players or active drawer, but keep comments display active
     const myPlayer = state.players.find(p => p.id === this.myPlayerId);
+    const isPrivateChat = !!state.settings?.privateChat;
+    const playerPrivacyBadge = document.getElementById('playerChatPrivacyBadge');
+    const chatHintText = document.getElementById('chatHintText');
+
+    if (playerPrivacyBadge) {
+      playerPrivacyBadge.className = `chat-mode-pill ${isPrivateChat ? 'pill-private' : 'pill-public'}`;
+      playerPrivacyBadge.textContent = isPrivateChat ? '🔒 PRIVATE' : '🌐 PUBLIC';
+      playerPrivacyBadge.title = isPrivateChat
+        ? 'Private Mode: Your guesses are visible only to you'
+        : 'Public Mode: Guesses are visible to everyone';
+    }
+
+    if (chatHintText) {
+      chatHintText.textContent = isPrivateChat
+        ? '🔒 Guesses show to yourself only'
+        : 'Guesses go here';
+    }
+
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
     if (chatInput) {
@@ -1497,7 +1816,9 @@ class ScribbleApp {
         if (chatSendBtn) chatSendBtn.disabled = true;
       } else {
         chatInput.disabled = false;
-        chatInput.placeholder = 'Type your guess or message...';
+        chatInput.placeholder = isPrivateChat
+          ? 'Type your guess (only visible to you)...'
+          : 'Type your guess or message...';
         chatInput.classList.remove('input-locked');
         if (chatSendBtn) chatSendBtn.disabled = false;
       }
@@ -1639,7 +1960,8 @@ class ScribbleApp {
       msgEl.className = `chat-msg chat-msg-system ${msg.highlight ? 'chat-msg-' + msg.highlight : ''}`;
       msgEl.textContent = msg.text;
     } else {
-      msgEl.className = `chat-msg chat-msg-user ${msg.closeGuess ? 'chat-msg-close-guess' : ''}`;
+      const isPrivateClass = msg.isPrivate ? (msg.closeGuess ? 'chat-msg-close-guess' : 'chat-msg-private') : '';
+      msgEl.className = `chat-msg chat-msg-user ${isPrivateClass}`.trim();
       msgEl.innerHTML = `
         <span class="chat-sender" style="color: ${msg.team === 'red' ? '#ef4444' : msg.team === 'blue' ? '#3b82f6' : 'var(--accent-cyan)'}">
           ${msg.isPrivate ? '<span class="chat-private-badge" title="Only visible to you">PRIVATE</span>' : ''}${this.escapeHtml(msg.name)}:
@@ -1697,6 +2019,63 @@ class ScribbleApp {
   updateAdminDashboard(state) {
     document.getElementById('adminGameStateBadge').textContent = `STATE: ${state.state}`;
     document.getElementById('adminPlayerCount').textContent = `${state.players.length} Players`;
+
+    // Admin Chat Visibility Sync
+    const isPrivateChat = !!state.settings?.privateChat;
+    const toggleBtn = document.getElementById('adminToggleChatBtn');
+    const toggleText = document.getElementById('adminToggleChatText');
+    const chatBadge = document.getElementById('adminChatModeBadge');
+    const liveStatusPill = document.getElementById('adminLiveChatStatusPill');
+
+    if (toggleBtn) {
+      if (isPrivateChat) {
+        toggleBtn.className = 'btn-secondary btn-chat-private-active';
+        toggleBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span id="adminToggleChatText">CHAT: PRIVATE (SELF ONLY)</span>
+        `;
+        toggleBtn.title = 'Private Chat is ENABLED (guesses visible to sender only). Click to switch to Public Chat.';
+      } else {
+        toggleBtn.className = 'btn-secondary';
+        toggleBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span id="adminToggleChatText">CHAT: PUBLIC (ALL)</span>
+        `;
+        toggleBtn.title = 'Public Chat is active (guesses visible to all). Click to switch to Private Chat (Self Only).';
+      }
+    }
+
+    if (chatBadge) {
+      chatBadge.className = isPrivateChat ? 'badge badge-warning' : 'badge badge-primary';
+      chatBadge.textContent = isPrivateChat ? 'CHAT: PRIVATE (SELF ONLY)' : 'CHAT: PUBLIC (ALL)';
+    }
+
+    if (liveStatusPill) {
+      liveStatusPill.className = isPrivateChat ? 'badge badge-warning' : 'badge badge-primary';
+      liveStatusPill.textContent = isPrivateChat ? 'Private (Visible to Self Only)' : 'Public (Display to All)';
+    }
+
+    // Summary Badges in Active Room Configuration Card
+    const roundsBadge = document.getElementById('adminSummaryRoundsBadge');
+    if (roundsBadge) roundsBadge.textContent = `${state.settings?.rounds || 3} Rounds`;
+
+    const drawTimeBadge = document.getElementById('adminSummaryDrawTimeBadge');
+    if (drawTimeBadge) drawTimeBadge.textContent = `${state.settings?.drawTime || 80}s Draw Time`;
+
+    const wordModeBadge = document.getElementById('adminSummaryWordModeBadge');
+    if (wordModeBadge) {
+      const isCustomWords = state.settings?.wordMode === 'custom' || (state.settings?.customWords && state.settings.customWords.length > 0);
+      wordModeBadge.textContent = isCustomWords ? 'Words: Custom List' : 'Words: Random Pool';
+    }
+
+    const summaryChatBadge = document.getElementById('adminSummaryChatModeBadge');
+    if (summaryChatBadge) {
+      summaryChatBadge.textContent = isPrivateChat ? 'Chat: Private (Self Only)' : 'Chat: Public (All)';
+      summaryChatBadge.className = isPrivateChat ? 'badge badge-warning' : 'badge badge-primary';
+    }
+
+    // Sync settings modal with latest live room state
+    this.syncSettingsModalRoom(state);
 
     // Secret Word Monitor
     const secretWordEl = document.getElementById('adminSecretWordDisplay');

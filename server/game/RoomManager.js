@@ -47,6 +47,10 @@ export class RoomManager {
       }
     }
 
+    if (typeof customSettings.privateChat === 'boolean') {
+      room.settings.privateChat = customSettings.privateChat;
+    }
+
     this.rooms.set(code, room);
     console.log(`[RoomManager] Created Room ${code} (AdminKey: ${adminKey})`);
 

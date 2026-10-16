@@ -68,18 +68,10 @@
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           Point System
         </button>
-        <button id="bgmToggleBtn" class="btn-audio" title="Toggle Upbeat Music">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-          BGM: OFF
+        <button id="settingsHeaderBtn" class="btn-audio btn-settings-header" title="Settings &amp; Options">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
         </button>
-        <button id="sfxToggleBtn" class="btn-audio" title="Toggle Sound FX">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-          SFX: ON
-        </button>
-        <div class="volume-slider-group">
-          <span class="vol-label">VOL</span>
-          <input type="range" id="masterVolume" min="0" max="1" step="0.05" value="0.7">
-        </div>
       </div>
       <div id="roleIndicator" class="role-pill hidden">PLAYER</div>
     </div>
@@ -108,22 +100,6 @@
           </button>
         </div>
 
-        <!-- Fair Play Point System Spotlight Banner -->
-        <div class="scoring-system-banner" id="lobbyScoringBanner">
-          <div class="scoring-banner-left">
-            <span class="scoring-pulse-badge">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              Fair Scoring 2.0
-            </span>
-            <div class="scoring-banner-text">
-              <strong>Balanced Point System Active:</strong> Drawers rewarded for clarity • Smooth ladder for guessers • Zero duplicate points
-            </div>
-          </div>
-          <button id="lobbyScoringBtn" class="btn-xs btn-outline" type="button">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            How Points Work
-          </button>
-        </div>
 
         <!-- TAB 1: JOIN AS PLAYER -->
         <div id="tabPlayer" class="tab-content active">
@@ -252,6 +228,27 @@
               </div>
             </div>
 
+            <div class="form-group">
+              <label class="form-label">Chat Guesses Visibility</label>
+              <div class="team-selector-row">
+                <label class="team-radio">
+                  <input type="radio" name="adminChatMode" value="public" checked>
+                  <span class="team-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Public (Display to All)
+                  </span>
+                </label>
+                <label class="team-radio">
+                  <input type="radio" name="adminChatMode" value="private">
+                  <span class="team-badge badge-amber">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Private (Show to Self Only)
+                  </span>
+                </label>
+              </div>
+              <div class="field-help">If Private is enabled, words typed in the chat box show only to the player who typed them. If Disabled/Public, displayed to all.</div>
+            </div>
+
             <!-- WORD SOURCE SELECTION: 2 OPTIONS -->
             <div class="form-group">
               <label class="form-label">Word Selection</label>
@@ -365,10 +362,6 @@
               Leaderboard
             </h3>
             <div class="panel-header-actions">
-              <button id="inGameScoringBtn" class="btn-xs btn-subtle in-game-rules-btn" title="View Scoring Rules">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                Rules
-              </button>
               <span id="playerCountBadge" class="badge">0</span>
             </div>
           </div>
@@ -479,8 +472,9 @@
             <h3>
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Guess Feed &amp; Chat
+              <span id="playerChatPrivacyBadge" class="chat-mode-pill pill-public" title="Public: Guesses visible to everyone">🌐 PUBLIC</span>
             </h3>
-            <span class="chat-hint">Guesses go here</span>
+            <span class="chat-hint" id="chatHintText">Guesses go here</span>
           </div>
 
           <div id="chatMessagesContainer" class="chat-messages-container">
@@ -519,6 +513,7 @@
               <span class="badge badge-primary">ROOM: <strong id="adminDisplayRoomCode">------</strong></span>
               <span class="badge badge-warning">ADMIN KEY: <strong id="adminDisplayKey">------</strong></span>
               <span id="adminGameStateBadge" class="badge badge-success">STATE: LOBBY</span>
+              <span id="adminChatModeBadge" class="badge badge-primary">CHAT: PUBLIC (ALL)</span>
             </div>
           </div>
           <div class="admin-quick-actions">
@@ -533,6 +528,10 @@
             <button id="adminSkipBtn" class="btn-secondary">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/></svg>
               SKIP TURN
+            </button>
+            <button id="adminSettingsBtn" class="btn-secondary" title="Configure Room Rules, Word Pool &amp; Chat Visibility">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              ROOM SETTINGS
             </button>
             <button id="adminEndGameBtn" class="btn-secondary">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
@@ -588,17 +587,14 @@
             </div>
           </div>
 
-          <!-- Right: Live Match Monitor & Word List Controls -->
+          <!-- Right: Live Match Monitor & Quick Controls -->
           <div class="admin-card glass-panel">
             <div class="card-title-row">
               <h3>
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                 Live Turn Monitor &amp; Secret Word
               </h3>
-              <label class="toggle-switch">
-                <input type="checkbox" id="adminRevealWordToggle" checked>
-                <span>Reveal Secret Word to Host</span>
-              </label>
+              <span id="adminMatchStatusBadge" class="badge badge-success">Match In Progress</span>
             </div>
 
             <div class="secret-word-display-box">
@@ -609,40 +605,33 @@
 
             <hr class="admin-divider">
 
-            <h3>
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-              Word Pool (Live Update)
-            </h3>
-            <p class="section-desc">Leave empty for automatic Random Words, or enter custom words (comma-separated):</p>
-            <textarea id="adminLiveWordList" class="form-textarea" rows="4" placeholder="Leave empty for Random Words, or type custom words..."></textarea>
-            <div class="admin-button-row">
-              <button id="adminSaveWordsBtn" class="btn-subtle">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                Update Word List
+            <div class="admin-config-summary-card">
+              <div class="card-title-row">
+                <h4 style="margin:0;font-size:0.95rem;display:flex;align-items:center;gap:6px;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  Room Settings &amp; Rules
+                </h4>
+                <button id="adminOpenSettingsCardBtn" class="btn-xs btn-outline" type="button">Configure in Settings &rarr;</button>
+              </div>
+              <p class="section-desc" style="margin-top:6px;margin-bottom:10px;">All gameplay rules, word pools, and chat privacy options are configured in Settings.</p>
+              <div class="admin-summary-badges">
+                <span class="badge badge-primary" id="adminSummaryRoundsBadge">3 Rounds</span>
+                <span class="badge badge-primary" id="adminSummaryDrawTimeBadge">80s Draw Time</span>
+                <span class="badge badge-primary" id="adminSummaryWordModeBadge">Words: Random</span>
+                <span class="badge badge-primary" id="adminSummaryChatModeBadge">Chat: Public</span>
+              </div>
+            </div>
+
+            <div class="admin-button-row" style="margin-top:auto;gap:8px;">
+              <button id="adminOpenSettingsBtn2" class="btn-primary full-width" type="button">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Open Room Settings
               </button>
-              <button id="adminOpenArenaLinkBtn" class="btn-subtle">
+              <button id="adminOpenArenaLinkBtn" class="btn-subtle full-width" type="button">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="15" x="2" y="3" rx="2"/><polyline points="17 21 12 18 7 21"/></svg>
-                Open Arena Display in New Tab
+                Open Arena Display
               </button>
             </div>
-
-            <hr class="admin-divider">
-
-            <h3>
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              Live Room Rules
-            </h3>
-            <div class="form-row-2">
-              <div class="form-group">
-                <label class="form-label">Rounds</label>
-                <input type="number" id="adminLiveRounds" class="form-input" min="1" max="10" value="3">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Draw Time (sec)</label>
-                <input type="number" id="adminLiveDrawTime" class="form-input" min="30" max="180" value="80">
-              </div>
-            </div>
-            <button id="adminSaveRulesBtn" class="btn-subtle full-width">Update Room Rules</button>
           </div>
 
         </div>
@@ -779,12 +768,6 @@
         <div id="roundEndFooterText" class="round-end-footer-text">Next round starting in a few seconds...</div>
       </div>
 
-      <div class="round-end-rules-hint">
-        <button id="roundEndScoringRulesBtn" class="round-end-rules-link" type="button">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          How are turn scores calculated? View scoring rules
-        </button>
-      </div>
     </div>
   </div>
 
@@ -853,10 +836,6 @@
       </div>
 
       <div class="podium-actions" style="margin-top: 20px;">
-        <button id="fullReportScoringBtn" class="btn-secondary btn-large">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          Point System Guide
-        </button>
         <button id="closeFullReportBtn" class="btn-secondary btn-large">&larr; Back to Podium</button>
         <button id="fullReportLobbyBtn" class="btn-primary btn-large">Return to Lobby</button>
       </div>
@@ -1065,6 +1044,191 @@ SUPABASE_ANON_KEY=eyJhbGciOi...</pre>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: UNIFIED SETTINGS & OPTIONS          -->
+  <!-- ========================================== -->
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="glass-panel settings-card">
+      <button id="closeSettingsCrossBtn" class="modal-close-cross" title="Close Settings">&times;</button>
+
+      <div class="settings-header">
+        <div class="settings-header-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <div class="settings-header-text">
+          <span class="badge badge-primary">SETTINGS &amp; OPTIONS</span>
+          <h2>Game &amp; Room Settings</h2>
+          <p>Configure room rules, word pool, chat visibility, and audio preferences.</p>
+        </div>
+      </div>
+
+      <!-- Settings Tabs -->
+      <div class="settings-nav-tabs">
+        <button class="settings-tab-btn active" data-settings-tab="tabSettingsRoom" id="settingsTabRoomBtn" type="button">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M3 20h18"/></svg>
+          Room &amp; Host Settings
+        </button>
+        <button class="settings-tab-btn" data-settings-tab="tabSettingsAudio" id="settingsTabAudioBtn" type="button">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          Audio &amp; Sound
+        </button>
+        <button class="settings-tab-btn" data-settings-tab="tabSettingsPoint" id="settingsTabPointBtn" type="button">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Point System
+        </button>
+      </div>
+
+      <!-- TAB 1: ROOM & HOST SETTINGS -->
+      <div id="tabSettingsRoom" class="settings-tab-content active">
+        
+        <!-- Chat Visibility Option -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <div>
+              <h3>Chat Guesses Visibility</h3>
+              <p class="settings-desc">Choose whether players see each other's typed words or if guesses show to the sender only.</p>
+            </div>
+            <span id="settingsChatStatusBadge" class="badge badge-primary">CHAT: PUBLIC (ALL)</span>
+          </div>
+
+          <div class="settings-chat-options-grid">
+            <div class="settings-choice-card" id="settingsChoicePublic">
+              <div class="choice-card-header">
+                <span class="choice-card-icon">🌐</span>
+                <strong>Public Chat Mode</strong>
+              </div>
+              <p>Every word and guess typed in the chat box is displayed to all players in the room.</p>
+              <button type="button" id="settingsSetPublicBtn" class="btn-subtle full-width">Select Public</button>
+            </div>
+
+            <div class="settings-choice-card" id="settingsChoicePrivate">
+              <div class="choice-card-header">
+                <span class="choice-card-icon">🔒</span>
+                <strong>Private Chat Mode (Self Only)</strong>
+              </div>
+              <p>Words and guesses typed in chat show only to the player who typed them. Other players cannot see them.</p>
+              <button type="button" id="settingsSetPrivateBtn" class="btn-subtle full-width">Select Private</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Room Rules -->
+        <div class="settings-section">
+          <h3>Match Duration &amp; Rounds</h3>
+          <p class="settings-desc">Adjust the total rounds and turn draw time for the active match.</p>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Rounds (1-10)</label>
+              <input type="number" id="settingsLiveRounds" class="form-input" min="1" max="10" value="3">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Draw Time (seconds)</label>
+              <input type="number" id="settingsLiveDrawTime" class="form-input" min="30" max="180" value="80">
+            </div>
+          </div>
+          <button id="settingsSaveRulesBtn" class="btn-primary" type="button">Update Room Rules</button>
+        </div>
+
+        <!-- Word Pool Management -->
+        <div class="settings-section">
+          <h3>Word Pool Management</h3>
+          <p class="settings-desc">Leave empty for automatic Random Words, or enter custom words (comma-separated):</p>
+          <textarea id="settingsLiveWordList" class="form-textarea" rows="3" placeholder="Leave empty for Random Words, or type custom words..."></textarea>
+          <div class="settings-button-row">
+            <button id="settingsSaveWordsBtn" class="btn-subtle" type="button">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Update Word Pool
+            </button>
+            <button id="settingsOpenArenaBtn" class="btn-subtle" type="button">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="15" x="2" y="3" rx="2"/><polyline points="17 21 12 18 7 21"/></svg>
+              Open Arena Display
+            </button>
+          </div>
+        </div>
+
+        <!-- Secret Word Privacy -->
+        <div class="settings-section">
+          <h3>Host Display Privacy</h3>
+          <label class="toggle-switch">
+            <input type="checkbox" id="settingsRevealWordToggle" checked>
+            <span>Reveal Secret Word to Host on Admin Screen</span>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: AUDIO & SOUND -->
+      <div id="tabSettingsAudio" class="settings-tab-content">
+        <div class="settings-section">
+          <h3>Sound &amp; Volume Preferences</h3>
+          <p class="settings-desc">Manage background music, sound cues, and master volume across all pages.</p>
+          
+          <div class="settings-audio-grid">
+            <div class="settings-audio-card">
+              <div class="audio-card-info">
+                <strong>Background Music (BGM)</strong>
+                <span>Upbeat arcade music</span>
+              </div>
+              <button id="settingsBgmToggleBtn" class="btn-secondary" type="button">♫ BGM: OFF</button>
+            </div>
+
+            <div class="settings-audio-card">
+              <div class="audio-card-info">
+                <strong>Sound Effects (SFX)</strong>
+                <span>Guess bells, timer cues &amp; audio alerts</span>
+              </div>
+              <button id="settingsSfxToggleBtn" class="btn-secondary" type="button">🔊 SFX: ON</button>
+            </div>
+
+            <div class="settings-audio-card full-width">
+              <div class="audio-card-info">
+                <strong>Master Volume</strong>
+                <span id="settingsVolumePct">70%</span>
+              </div>
+              <input type="range" id="settingsMasterVolume" min="0" max="1" step="0.05" value="0.7" style="flex:1;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: POINT SYSTEM & RULES -->
+      <div id="tabSettingsPoint" class="settings-tab-content">
+        <div class="settings-section">
+          <h3>Fair Play Scoring 2.0</h3>
+          <p class="settings-desc">Balanced scoring that rewards artistic clarity and quick deduction.</p>
+          <div class="scoring-pillars-grid">
+            <div class="scoring-pillar-card drawer-pillar">
+              <div class="pillar-header">
+                <span class="pillar-icon">🎨</span>
+                <div>
+                  <h4>Drawer Scoring</h4>
+                  <span class="pillar-tag">Reward for Clear Art</span>
+                </div>
+              </div>
+              <p>Earn up to <strong>425+ pts</strong> based on how many players find the word and how quickly they solve it.</p>
+            </div>
+            <div class="scoring-pillar-card guesser-pillar">
+              <div class="pillar-header">
+                <span class="pillar-icon">⚡</span>
+                <div>
+                  <h4>Guesser Scoring</h4>
+                  <span class="pillar-tag">Speed &amp; Ladder</span>
+                </div>
+              </div>
+              <p>Base reward (+120 pts) + Speed bonus (up to +180 pts) + Ladder rank bonus (+120 to +24 pts) + Streaks.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Footer -->
+      <div class="settings-footer">
+        <button id="closeSettingsBtn" class="btn-primary btn-large full-width" type="button">Done &amp; Close Settings</button>
+      </div>
+
     </div>
   </div>
 
