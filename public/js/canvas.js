@@ -196,10 +196,8 @@ export class DrawingBoard {
       this.lastPoint = { x: stroke.x, y: stroke.y };
     } else if (stroke.type === 'fill') {
       this.floodFill(stroke.x, stroke.y, stroke.color);
-    } else if (stroke.type === 'clear') {
+    } else if (stroke.type === 'clear' || stroke.type === 'bomb') {
       this.initCanvasBackground();
-    } else if (stroke.type === 'bomb') {
-      this.animateBomb();
     }
   }
 
@@ -290,13 +288,6 @@ export class DrawingBoard {
     this.ctx.putImageData(imgData, 0, 0);
   }
 
-  animateBomb() {
-    this.canvas.classList.add('bomb-shake');
-    setTimeout(() => {
-      this.initCanvasBackground();
-      this.canvas.classList.remove('bomb-shake');
-    }, 400);
-  }
 
   reset() {
     this.initCanvasBackground();

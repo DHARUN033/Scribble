@@ -43,6 +43,7 @@ class ScribbleApp {
   }
 
   init() {
+    window.alert = (msg) => this.showUiAlert(msg);
     // 1. Bind UI events FIRST so all buttons (volume, tabs, audio) work immediately
     this.bindDOMEvents();
     this.initConfetti();
@@ -106,6 +107,145 @@ class ScribbleApp {
     if (banner) {
       banner.classList.add('hidden');
     }
+  }
+
+  // --- INTEGRATED UI MODALS & TOAST NOTIFICATIONS ---
+
+  showToast(message, type = 'info', duration = 3200) {
+    const container = document.getElementById('uiToastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `ui-toast ui-toast-${type}`;
+
+    let iconSvg = '';
+    if (type === 'success') {
+      iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else if (type === 'warning') {
+      iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    } else if (type === 'error') {
+      iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    } else {
+      iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+    }
+
+    toast.innerHTML = `
+      <span class="ui-toast-icon">${iconSvg}</span>
+      <span class="ui-toast-msg">${this.escapeHtml(message)}</span>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 300);
+    }, duration);
+  }
+
+  showUiAlert(message, title = 'Notice', iconType = 'info') {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('uiDialogModal');
+      const titleEl = document.getElementById('uiDialogTitle');
+      const msgEl = document.getElementById('uiDialogMessage');
+      const iconEl = document.getElementById('uiDialogIcon');
+      const cancelBtn = document.getElementById('uiDialogCancelBtn');
+      const confirmBtn = document.getElementById('uiDialogConfirmBtn');
+
+      if (!modal || !confirmBtn) {
+        return resolve(true);
+      }
+
+      if (titleEl) titleEl.textContent = title;
+      if (msgEl) msgEl.textContent = message;
+
+      let iconSvg = '';
+      if (iconType === 'error') {
+        iconSvg = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--accent-rose)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+      } else if (iconType === 'warning') {
+        iconSvg = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--accent-amber)" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      } else if (iconType === 'success') {
+        iconSvg = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--accent-emerald)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+      } else {
+        iconSvg = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--accent-cyan)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+      }
+      if (iconEl) iconEl.innerHTML = iconSvg;
+
+      if (cancelBtn) cancelBtn.style.display = 'none';
+      confirmBtn.textContent = 'Got It';
+      confirmBtn.className = 'btn-primary';
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        confirmBtn.removeEventListener('click', onConfirm);
+      };
+
+      const onConfirm = () => {
+        cleanup();
+        resolve(true);
+      };
+
+      confirmBtn.addEventListener('click', onConfirm);
+      modal.classList.remove('hidden');
+    });
+  }
+
+  showUiConfirm(message, title = 'Are you sure?', options = {}) {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('uiDialogModal');
+      const titleEl = document.getElementById('uiDialogTitle');
+      const msgEl = document.getElementById('uiDialogMessage');
+      const iconEl = document.getElementById('uiDialogIcon');
+      const cancelBtn = document.getElementById('uiDialogCancelBtn');
+      const confirmBtn = document.getElementById('uiDialogConfirmBtn');
+
+      if (!modal || !confirmBtn) {
+        return resolve(false);
+      }
+
+      if (titleEl) titleEl.textContent = title;
+      if (msgEl) msgEl.textContent = message;
+
+      const isDanger = !!options.isDanger;
+      const iconType = options.iconType || (isDanger ? 'warning' : 'info');
+
+      let iconSvg = '';
+      if (iconType === 'error') {
+        iconSvg = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--accent-rose)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+      } else if (iconType === 'warning') {
+        iconSvg = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--accent-amber)" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      } else {
+        iconSvg = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--accent-cyan)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+      }
+      if (iconEl) iconEl.innerHTML = iconSvg;
+
+      if (cancelBtn) {
+        cancelBtn.style.display = 'inline-flex';
+        cancelBtn.textContent = options.cancelText || 'Cancel';
+      }
+      confirmBtn.textContent = options.confirmText || 'Confirm';
+      confirmBtn.className = isDanger ? 'btn-danger' : 'btn-primary';
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        confirmBtn.removeEventListener('click', onConfirm);
+        cancelBtn?.removeEventListener('click', onCancel);
+      };
+
+      const onConfirm = () => {
+        cleanup();
+        resolve(true);
+      };
+
+      const onCancel = () => {
+        cleanup();
+        resolve(false);
+      };
+
+      confirmBtn.addEventListener('click', onConfirm);
+      cancelBtn?.addEventListener('click', onCancel);
+      modal.classList.remove('hidden');
+    });
   }
 
   initServerSettingsUI() {
@@ -253,13 +393,13 @@ class ScribbleApp {
         this.showPodiumModal(data);
       });
 
-      this.socket.on('kicked_by_host', ({ reason }) => {
-        alert(`You have been removed: ${reason}`);
+      this.socket.on('kicked_by_host', async ({ reason }) => {
+        await this.showUiAlert(`You have been removed: ${reason}`, 'Removed from Game', 'error');
         window.location.reload();
       });
 
-      this.socket.on('lobby_closed_by_host', ({ message }) => {
-        alert(message || 'The host has ended and closed this lobby.');
+      this.socket.on('lobby_closed_by_host', async ({ message }) => {
+        await this.showUiAlert(message || 'The host has ended and closed this lobby.', 'Lobby Closed', 'warning');
         window.location.href = window.location.pathname;
       });
 
@@ -285,8 +425,9 @@ class ScribbleApp {
     });
 
     // Brand Logo reload
-    document.getElementById('brandLogo')?.addEventListener('click', () => {
-      if (confirm('Leave current match and return to home?')) {
+    document.getElementById('brandLogo')?.addEventListener('click', async () => {
+      const ok = await this.showUiConfirm('Leave current match and return to home?', 'Leave Match', { confirmText: 'Leave', isDanger: true });
+      if (ok) {
         window.location.href = window.location.pathname;
       }
     });
@@ -377,18 +518,12 @@ class ScribbleApp {
     document.getElementById('closeHallOfFameBtn')?.addEventListener('click', closeLobbyResults);
     document.getElementById('lobbyResultsCrossBtn')?.addEventListener('click', closeLobbyResults);
 
-    // Fair Play Scoring Rules Modal (opened via top header button)
-    const openScoringRules = () => this.openScoringRulesModal();
-    const closeScoringRules = () => this.closeScoringRulesModal();
+    // Fair Play Scoring Rules (unified into Settings Modal)
+    const openScoringRules = () => this.openSettingsModal('tabSettingsPoint');
+    const closeScoringRules = () => this.closeSettingsModal();
     document.getElementById('pointSystemHeaderBtn')?.addEventListener('click', openScoringRules);
     document.getElementById('closeScoringRulesBtn')?.addEventListener('click', closeScoringRules);
     document.getElementById('closeScoringRulesCrossBtn')?.addEventListener('click', closeScoringRules);
-
-    document.getElementById('scoringRulesModal')?.addEventListener('click', (e) => {
-      if (e.target.id === 'scoringRulesModal') {
-        closeScoringRules();
-      }
-    });
 
     // Settings Modal (Unified Settings for all pages & Host Control)
     const openSettings = (tab) => this.openSettingsModal(tab);
@@ -403,6 +538,32 @@ class ScribbleApp {
     document.getElementById('closeSettingsCrossBtn')?.addEventListener('click', closeSettings);
     document.getElementById('settingsModal')?.addEventListener('click', (e) => {
       if (e.target.id === 'settingsModal') closeSettings();
+    });
+
+    // Settings Match Archives Tab Navigation & Refresh
+    document.getElementById('tabSettingsLobbyMatchesBtn')?.addEventListener('click', () => {
+      document.getElementById('tabSettingsLobbyMatchesBtn')?.classList.add('active');
+      document.getElementById('tabSettingsGlobalRanksBtn')?.classList.remove('active');
+      document.getElementById('settingsLobbyMatchesContent')?.classList.remove('hidden');
+      document.getElementById('settingsGlobalRanksContent')?.classList.add('hidden');
+      this.loadLobbyResults(true);
+    });
+
+    document.getElementById('tabSettingsGlobalRanksBtn')?.addEventListener('click', () => {
+      document.getElementById('tabSettingsGlobalRanksBtn')?.classList.add('active');
+      document.getElementById('tabSettingsLobbyMatchesBtn')?.classList.remove('active');
+      document.getElementById('settingsGlobalRanksContent')?.classList.remove('hidden');
+      document.getElementById('settingsLobbyMatchesContent')?.classList.add('hidden');
+      this.loadGlobalLeaderboard();
+    });
+
+    document.getElementById('refreshSettingsHistoryBtn')?.addEventListener('click', () => {
+      const isGlobalRanks = document.getElementById('tabSettingsGlobalRanksBtn')?.classList.contains('active');
+      if (isGlobalRanks) {
+        this.loadGlobalLeaderboard();
+      } else {
+        this.loadLobbyResults(true);
+      }
     });
 
     // Settings Tab Switching
@@ -422,8 +583,9 @@ class ScribbleApp {
       }, (res) => {
         if (res?.success) {
           this.syncSettingsModalChat(false);
+          this.showToast('Chat set to Public (All Players)', 'success');
         } else {
-          alert(res?.error || 'Could not change chat visibility');
+          this.showToast(res?.error || 'Could not change chat visibility', 'error');
         }
       });
     });
@@ -436,8 +598,9 @@ class ScribbleApp {
       }, (res) => {
         if (res?.success) {
           this.syncSettingsModalChat(true);
+          this.showToast('Chat set to Private (Self Only)', 'success');
         } else {
-          alert(res?.error || 'Could not change chat visibility');
+          this.showToast(res?.error || 'Could not change chat visibility', 'error');
         }
       });
     });
@@ -446,8 +609,8 @@ class ScribbleApp {
     document.getElementById('settingsSaveRulesBtn')?.addEventListener('click', () => {
       const rounds = parseInt(document.getElementById('settingsLiveRounds')?.value, 10);
       const drawTime = parseInt(document.getElementById('settingsLiveDrawTime')?.value, 10);
-      if (isNaN(rounds) || rounds < 1 || rounds > 10) return alert('Rounds must be between 1 and 10');
-      if (isNaN(drawTime) || drawTime < 30 || drawTime > 180) return alert('Draw time must be between 30 and 180 seconds');
+      if (isNaN(rounds) || rounds < 1 || rounds > 10) return this.showToast('Rounds must be between 1 and 10', 'warning');
+      if (isNaN(drawTime) || drawTime < 30 || drawTime > 180) return this.showToast('Draw time must be between 30 and 180 seconds', 'warning');
 
       this.socket.emit('admin_update_settings', {
         roomCode: this.roomCode,
@@ -455,9 +618,9 @@ class ScribbleApp {
         settings: { rounds, drawTime }
       }, (res) => {
         if (res?.success) {
-          alert('Room rules updated successfully!');
+          this.showToast('Room rules updated successfully!', 'success');
         } else {
-          alert(res?.error || 'Could not update room rules');
+          this.showToast(res?.error || 'Could not update room rules', 'error');
         }
       });
     });
@@ -475,9 +638,9 @@ class ScribbleApp {
         }
       }, (res) => {
         if (res?.success) {
-          alert(wordMode === 'custom' ? 'Custom words updated successfully!' : 'Switched to automatic Random Words!');
+          this.showToast(wordMode === 'custom' ? 'Custom words updated successfully!' : 'Switched to automatic Random Words!', 'success');
         } else {
-          alert(res?.error || 'Could not update word pool');
+          this.showToast(res?.error || 'Could not update word pool', 'error');
         }
       });
     });
@@ -535,11 +698,31 @@ class ScribbleApp {
       }
     });
 
+    // Mobile In-Game Tab Switcher (Chat & Guesses vs Leaderboard)
+    const chatTabBtn = document.getElementById('mobileTabChatBtn');
+    const lbTabBtn = document.getElementById('mobileTabLeaderboardBtn');
+    const chatPanel = document.getElementById('chatPanel');
+    const lbPanel = document.getElementById('leaderboardPanel');
+
+    chatTabBtn?.addEventListener('click', () => {
+      chatTabBtn.classList.add('active');
+      lbTabBtn?.classList.remove('active');
+      chatPanel?.classList.remove('mobile-hidden');
+      lbPanel?.classList.add('mobile-hidden');
+    });
+
+    lbTabBtn?.addEventListener('click', () => {
+      lbTabBtn.classList.add('active');
+      chatTabBtn?.classList.remove('active');
+      lbPanel?.classList.remove('mobile-hidden');
+      chatPanel?.classList.add('mobile-hidden');
+    });
+
     // Copy Invite & QR Code
     document.getElementById('copyInviteBtn')?.addEventListener('click', () => {
       const url = `${window.location.origin}?room=${this.roomCode}`;
       navigator.clipboard.writeText(url).then(() => {
-        alert(`Invite link copied to clipboard!\n${url}`);
+        this.showToast('Invite link copied to clipboard!', 'success');
       });
     });
 
@@ -653,14 +836,14 @@ class ScribbleApp {
     document.getElementById('reconnectAdminBtn')?.addEventListener('click', () => {
       const code = document.getElementById('reconnectRoomCode')?.value.trim();
       const key = document.getElementById('reconnectAdminKey')?.value.trim();
-      if (!code || !key) return alert('Please enter both Room Code and Admin Passkey');
+      if (!code || !key) return this.showUiAlert('Please enter both Room Code and Admin Passkey', 'Missing Credentials', 'warning');
       this.joinAsAdmin(code, key);
     });
 
     // Launch Arena Display button
     document.getElementById('launchArenaBtn')?.addEventListener('click', () => {
       const code = document.getElementById('arenaRoomCode')?.value.trim();
-      if (!code) return alert('Please enter a Room Code');
+      if (!code) return this.showUiAlert('Please enter a Room Code', 'Missing Room Code', 'warning');
       this.joinAsArena(code);
     });
 
@@ -715,7 +898,7 @@ class ScribbleApp {
         roomCode: this.roomCode,
         adminKey: this.adminKey
       }, (res) => {
-        if (!res?.success) alert(res?.error || 'Failed to start game');
+        if (!res?.success) this.showUiAlert(res?.error || 'Failed to start game', 'Cannot Start Game', 'error');
       });
     });
 
@@ -725,7 +908,7 @@ class ScribbleApp {
         roomCode: this.roomCode,
         adminKey: this.adminKey
       }, (res) => {
-        if (!res?.success) alert(res?.error || 'Could not toggle chat mode');
+        if (!res?.success) this.showToast(res?.error || 'Could not toggle chat mode', 'error');
       });
     });
 
@@ -735,7 +918,7 @@ class ScribbleApp {
         adminKey: this.adminKey,
         enabled: true
       }, (res) => {
-        if (!res?.success) alert(res?.error || 'Could not enable private chat');
+        if (!res?.success) this.showToast(res?.error || 'Could not enable private chat', 'error');
       });
     });
 
@@ -745,7 +928,7 @@ class ScribbleApp {
         adminKey: this.adminKey,
         enabled: false
       }, (res) => {
-        if (!res?.success) alert(res?.error || 'Could not disable private chat');
+        if (!res?.success) this.showToast(res?.error || 'Could not disable private chat', 'error');
       });
     });
 
@@ -767,28 +950,30 @@ class ScribbleApp {
       });
     });
 
-    document.getElementById('adminEndGameBtn')?.addEventListener('click', () => {
-      if (confirm('End the current match early? (Shows podium and resets to lobby)')) {
+    document.getElementById('adminEndGameBtn')?.addEventListener('click', async () => {
+      const ok = await this.showUiConfirm('End the current match early? (Shows podium and resets to lobby)', 'End Match Early', { confirmText: 'End Match', isDanger: true });
+      if (ok) {
         this.socket.emit('admin_end_match', {
           roomCode: this.roomCode,
           adminKey: this.adminKey
         }, (res) => {
-          if (!res?.success) alert(res?.error || 'Could not end match');
+          if (!res?.success) this.showUiAlert(res?.error || 'Could not end match', 'Error', 'error');
         });
       }
     });
 
-    document.getElementById('adminCloseLobbyBtn')?.addEventListener('click', () => {
-      if (confirm('Permanently close and destroy this lobby for everyone?')) {
+    document.getElementById('adminCloseLobbyBtn')?.addEventListener('click', async () => {
+      const ok = await this.showUiConfirm('Permanently close and destroy this lobby for everyone?', 'Close Lobby', { confirmText: 'Destroy Lobby', isDanger: true });
+      if (ok) {
         this.socket.emit('admin_close_lobby', {
           roomCode: this.roomCode,
           adminKey: this.adminKey
-        }, (res) => {
+        }, async (res) => {
           if (res?.success) {
-            alert('Lobby closed successfully.');
+            await this.showUiAlert('Lobby closed successfully.', 'Lobby Closed', 'info');
             window.location.href = window.location.pathname;
           } else {
-            alert(res?.error || 'Could not close lobby');
+            this.showUiAlert(res?.error || 'Could not close lobby', 'Error', 'error');
           }
         });
       }
@@ -806,7 +991,7 @@ class ScribbleApp {
         }
       }, (res) => {
         if (res?.success) {
-          alert(wordMode === 'custom' ? 'Custom words updated successfully!' : 'Switched to automatic Random Words!');
+          this.showToast(wordMode === 'custom' ? 'Custom words updated successfully!' : 'Switched to automatic Random Words!', 'success');
         }
       });
     });
@@ -819,7 +1004,7 @@ class ScribbleApp {
         adminKey: this.adminKey,
         settings: { rounds, drawTime }
       }, (res) => {
-        if (res?.success) alert('Room rules updated!');
+        if (res?.success) this.showToast('Room rules updated!', 'success');
       });
     });
 
@@ -1011,14 +1196,11 @@ class ScribbleApp {
 
 
   openScoringRulesModal() {
-    const modal = document.getElementById('scoringRulesModal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    modal.scrollTop = 0;
+    this.openSettingsModal('tabSettingsPoint');
   }
 
   closeScoringRulesModal() {
-    document.getElementById('scoringRulesModal')?.classList.add('hidden');
+    this.closeSettingsModal();
   }
 
   openSettingsModal(preferredTab = null) {
@@ -1044,6 +1226,11 @@ class ScribbleApp {
     }
 
     this.switchSettingsTab(targetTab);
+
+    // If opening history/archives tab, fetch fresh data
+    if (targetTab === 'tabSettingsHistory') {
+      this.loadLobbyResults();
+    }
 
     // Sync audio states
     const isBgmPlaying = !!soundEngine.bgmPlaying;
@@ -1143,33 +1330,23 @@ class ScribbleApp {
   }
 
   openHallOfFameModal() {
-    this.openLobbyResultsModal();
+    this.openSettingsModal('tabSettingsHistory');
   }
 
   openLobbyResultsModal() {
-    const modal = document.getElementById('hallOfFameModal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    modal.scrollTop = 0;
-    const content = document.getElementById('tabLobbyMatchesContent');
-    if (content) content.scrollTop = 0;
-
-    // Default to Lobby Matches tab
-    document.getElementById('tabLobbyMatchesBtn')?.classList.add('active');
-    document.getElementById('tabGlobalRanksBtn')?.classList.remove('active');
-    document.getElementById('tabLobbyMatchesContent')?.classList.remove('hidden');
-    document.getElementById('tabGlobalRanksContent')?.classList.add('hidden');
-
-    this.loadLobbyResults();
+    this.openSettingsModal('tabSettingsHistory');
   }
 
   async loadLobbyResults(showLoading = false) {
     const listEl = document.getElementById('lobbyResultsList');
+    const settingsListEl = document.getElementById('settingsLobbyResultsList');
     const countEl = document.getElementById('lobbyMatchCount');
-    if (!listEl) return;
+    if (!listEl && !settingsListEl) return;
 
     if (showLoading || !this.cachedLobbyResults) {
-      listEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);">Loading live lobby results...</div>';
+      const loadingHtml = '<div style="text-align:center;padding:30px;color:var(--text-muted);">Loading live lobby results...</div>';
+      if (listEl) listEl.innerHTML = loadingHtml;
+      if (settingsListEl) settingsListEl.innerHTML = loadingHtml;
     }
 
     try {
@@ -1180,120 +1357,131 @@ class ScribbleApp {
       if (countEl) countEl.textContent = results.length;
       this.renderLobbyResults(results);
     } catch (e) {
-      listEl.innerHTML = `<div style="text-align:center;padding:20px;color:var(--accent-rose);">Failed to load lobby results: ${e.message}</div>`;
+      const errHtml = `<div style="text-align:center;padding:20px;color:var(--accent-rose);">Failed to load lobby results: ${e.message}</div>`;
+      if (listEl) listEl.innerHTML = errHtml;
+      if (settingsListEl) settingsListEl.innerHTML = errHtml;
     }
   }
 
   renderLobbyResults(results) {
     const listEl = document.getElementById('lobbyResultsList');
+    const settingsListEl = document.getElementById('settingsLobbyResultsList');
     const countEl = document.getElementById('lobbyMatchCount');
-    if (!listEl) return;
+    if (!listEl && !settingsListEl) return;
 
     if (countEl) countEl.textContent = results.length;
 
     if (!results || results.length === 0) {
-      listEl.innerHTML = `
+      const emptyHtml = `
         <div class="lobby-empty-state">
           <div class="empty-icon">${SVG_ICONS.gamepad}</div>
           <p class="empty-title">No Lobby Matches Recorded Yet</p>
           <p class="empty-desc">Once any game lobby finishes a match, the full match result and player rankings will automatically appear here!</p>
         </div>
       `;
+      if (listEl) listEl.innerHTML = emptyHtml;
+      if (settingsListEl) settingsListEl.innerHTML = emptyHtml;
       return;
     }
 
-    listEl.innerHTML = '';
-    results.forEach((r, idx) => {
-      const card = document.createElement('div');
-      card.className = 'lobby-card-item';
-      const cardId = r.id || `session_${idx}`;
-      card.id = `lobby_result_${cardId}`;
+    const renderToContainer = (container) => {
+      if (!container) return;
+      container.innerHTML = '';
+      results.forEach((r, idx) => {
+        const card = document.createElement('div');
+        card.className = 'lobby-card-item';
+        const cardId = `${container.id}_${r.id || `session_${idx}`}`;
+        card.id = `lobby_result_${cardId}`;
 
-      const modeBadge = r.game_mode === 'team' ? 'Red vs Blue Team' : 'Classic FFA';
-      const timeAgo = this.formatTimeAgo(r.created_at);
-      const winnerName = r.winner_name || 'Champion';
-      const winnerScore = r.winner_score || 0;
-      
-      const podiumList = Array.isArray(r.podium) ? r.podium : [];
-      const winnerAvatar = r.winner_avatar || (podiumList[0] && podiumList[0].avatar) || {};
+        const modeBadge = r.game_mode === 'team' ? 'Red vs Blue Team' : 'Classic FFA';
+        const timeAgo = this.formatTimeAgo(r.created_at);
+        const winnerName = r.winner_name || 'Champion';
+        const winnerScore = r.winner_score || 0;
+        
+        const podiumList = Array.isArray(r.podium) ? r.podium : [];
+        const winnerAvatar = r.winner_avatar || (podiumList[0] && podiumList[0].avatar) || {};
 
-      let podiumSummaryHtml = '';
-      if (podiumList[1]) {
-        podiumSummaryHtml += `<div class="podium-summary-item"><span>2nd:</span> <strong>${this.escapeHtml(podiumList[1].name)}</strong> <span style="color:var(--accent-cyan);">(${podiumList[1].score || 0} pts)</span></div>`;
-      }
-      if (podiumList[2]) {
-        podiumSummaryHtml += `<div class="podium-summary-item"><span>3rd:</span> <strong>${this.escapeHtml(podiumList[2].name)}</strong> <span style="color:var(--accent-cyan);">(${podiumList[2].score || 0} pts)</span></div>`;
-      }
+        let podiumSummaryHtml = '';
+        if (podiumList[1]) {
+          podiumSummaryHtml += `<div class="podium-summary-item"><span>2nd:</span> <strong>${this.escapeHtml(podiumList[1].name)}</strong> <span style="color:var(--accent-cyan);">(${podiumList[1].score || 0} pts)</span></div>`;
+        }
+        if (podiumList[2]) {
+          podiumSummaryHtml += `<div class="podium-summary-item"><span>3rd:</span> <strong>${this.escapeHtml(podiumList[2].name)}</strong> <span style="color:var(--accent-cyan);">(${podiumList[2].score || 0} pts)</span></div>`;
+        }
 
-      const allPlayers = Array.isArray(r.all_players) && r.all_players.length > 0 ? r.all_players : podiumList;
-      const totalPlayers = allPlayers.length;
+        const allPlayers = Array.isArray(r.all_players) && r.all_players.length > 0 ? r.all_players : podiumList;
+        const totalPlayers = allPlayers.length;
 
-      // Build drawer rows
-      let drawerRowsHtml = '';
-      allPlayers.forEach((p, pIdx) => {
-        const medal = pIdx === 0 ? '1st' : pIdx === 1 ? '2nd' : pIdx === 2 ? '3rd' : `#${pIdx + 1}`;
-        const teamTag = p.team && p.team !== 'auto' ? `<span class="team-badge badge-${p.team}" style="font-size:0.65rem;padding:1px 5px;margin-left:4px;">${p.team}</span>` : '';
-        drawerRowsHtml += `
-          <div class="lobby-player-row">
-            <div class="player-row-left">
-              <span class="player-row-rank">${medal}</span>
-              <div class="player-row-avatar">${renderAvatarSvg(p.avatar || {}, 20)}</div>
-              <strong>${this.escapeHtml(p.name)}</strong>
-              ${teamTag}
+        // Build drawer rows
+        let drawerRowsHtml = '';
+        allPlayers.forEach((p, pIdx) => {
+          const medal = pIdx === 0 ? '1st' : pIdx === 1 ? '2nd' : pIdx === 2 ? '3rd' : `#${pIdx + 1}`;
+          const teamTag = p.team && p.team !== 'auto' ? `<span class="team-badge badge-${p.team}" style="font-size:0.65rem;padding:1px 5px;margin-left:4px;">${p.team}</span>` : '';
+          drawerRowsHtml += `
+            <div class="lobby-player-row">
+              <div class="player-row-left">
+                <span class="player-row-rank">${medal}</span>
+                <div class="player-row-avatar">${renderAvatarSvg(p.avatar || {}, 20)}</div>
+                <strong>${this.escapeHtml(p.name)}</strong>
+                ${teamTag}
+              </div>
+              <div class="player-row-score">${p.score || 0} pts</div>
             </div>
-            <div class="player-row-score">${p.score || 0} pts</div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="lobby-card-top">
+            <div class="lobby-card-info">
+              <span class="lobby-code-badge">LOBBY #${r.room_code || 'MATCH'}</span>
+              <span class="lobby-mode-badge">${modeBadge}</span>
+              <span class="lobby-rounds-badge">${r.total_rounds || 3} Rounds</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span class="lobby-time-tag">${timeAgo}</span>
+              <button class="toggle-players-btn" data-target="drawer_${cardId}">
+                Standings (${totalPlayers})
+              </button>
+            </div>
+          </div>
+
+          <div class="lobby-card-body">
+            <div class="lobby-winner-pill">
+              <div class="lobby-winner-avatar">${renderAvatarSvg(winnerAvatar, 28)}</div>
+              <div class="lobby-winner-info">
+                <span class="winner-crown-label">Champion</span>
+                <span class="winner-name">${this.escapeHtml(winnerName)}</span>
+              </div>
+              <span class="winner-points-tag">${winnerScore} pts</span>
+            </div>
+
+            ${podiumSummaryHtml ? `<div class="lobby-podium-summary">${podiumSummaryHtml}</div>` : ''}
+          </div>
+
+          <div class="lobby-players-drawer hidden" id="drawer_${cardId}">
+            <div class="drawer-header-row">
+              <span>RANK &amp; PLAYER</span>
+              <span style="text-align:right;">EARNED POINTS</span>
+            </div>
+            ${drawerRowsHtml}
           </div>
         `;
+
+        // Handle drawer toggle
+        const toggleBtn = card.querySelector('.toggle-players-btn');
+        const drawer = card.querySelector(`#drawer_${cardId}`);
+        toggleBtn?.addEventListener('click', () => {
+          const isHidden = drawer.classList.contains('hidden');
+          drawer.classList.toggle('hidden', !isHidden);
+          toggleBtn.textContent = isHidden ? `Hide Standings (${totalPlayers})` : `Standings (${totalPlayers})`;
+        });
+
+        container.appendChild(card);
       });
+    };
 
-      card.innerHTML = `
-        <div class="lobby-card-top">
-          <div class="lobby-card-info">
-            <span class="lobby-code-badge">LOBBY #${r.room_code || 'MATCH'}</span>
-            <span class="lobby-mode-badge">${modeBadge}</span>
-            <span class="lobby-rounds-badge">${r.total_rounds || 3} Rounds</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <span class="lobby-time-tag">${timeAgo}</span>
-            <button class="toggle-players-btn" data-target="drawer_${cardId}">
-              Standings (${totalPlayers})
-            </button>
-          </div>
-        </div>
-
-        <div class="lobby-card-body">
-          <div class="lobby-winner-pill">
-            <div class="lobby-winner-avatar">${renderAvatarSvg(winnerAvatar, 28)}</div>
-            <div class="lobby-winner-info">
-              <span class="winner-crown-label">Champion</span>
-              <span class="winner-name">${this.escapeHtml(winnerName)}</span>
-            </div>
-            <span class="winner-points-tag">${winnerScore} pts</span>
-          </div>
-
-          ${podiumSummaryHtml ? `<div class="lobby-podium-summary">${podiumSummaryHtml}</div>` : ''}
-        </div>
-
-        <div class="lobby-players-drawer hidden" id="drawer_${cardId}">
-          <div class="drawer-header-row">
-            <span>RANK &amp; PLAYER</span>
-            <span style="text-align:right;">EARNED POINTS</span>
-          </div>
-          ${drawerRowsHtml}
-        </div>
-      `;
-
-      // Handle drawer toggle
-      const toggleBtn = card.querySelector('.toggle-players-btn');
-      const drawer = card.querySelector(`#drawer_${cardId}`);
-      toggleBtn?.addEventListener('click', () => {
-        const isHidden = drawer.classList.contains('hidden');
-        drawer.classList.toggle('hidden', !isHidden);
-        toggleBtn.textContent = isHidden ? `Hide Standings (${totalPlayers})` : `Standings (${totalPlayers})`;
-      });
-
-      listEl.appendChild(card);
-    });
+    if (listEl) renderToContainer(listEl);
+    if (settingsListEl) renderToContainer(settingsListEl);
   }
 
   handleNewLobbyResult(newSession) {
@@ -1307,8 +1495,9 @@ class ScribbleApp {
     }
 
     const modal = document.getElementById('hallOfFameModal');
+    const settingsModal = document.getElementById('settingsModal');
     // If modal is visible, re-render
-    if (modal && !modal.classList.contains('hidden')) {
+    if ((modal && !modal.classList.contains('hidden')) || (settingsModal && !settingsModal.classList.contains('hidden'))) {
       this.renderLobbyResults(this.cachedLobbyResults);
     } else {
       // Update count badge
@@ -1319,38 +1508,52 @@ class ScribbleApp {
 
   async loadGlobalLeaderboard() {
     const tbody = document.getElementById('hallOfFameTableBody');
-    if (!tbody) return;
+    const settingsTbody = document.getElementById('settingsHallOfFameTableBody');
+    if (!tbody && !settingsTbody) return;
 
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading All-Time Player Ranks...</td></tr>';
+    const loadingRow = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading All-Time Player Ranks...</td></tr>';
+    if (tbody) tbody.innerHTML = loadingRow;
+    if (settingsTbody) settingsTbody.innerHTML = loadingRow;
+
     try {
       const res = await fetch(this.apiUrl('/api/leaderboard'));
       const data = await res.json();
-      tbody.innerHTML = '';
+      if (tbody) tbody.innerHTML = '';
+      if (settingsTbody) settingsTbody.innerHTML = '';
 
       if (!data.leaderboard || data.leaderboard.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">No player records yet. Finish a match to record all-time points!</td></tr>';
+        const emptyRow = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">No player records yet. Finish a match to record all-time points!</td></tr>';
+        if (tbody) tbody.innerHTML = emptyRow;
+        if (settingsTbody) settingsTbody.innerHTML = emptyRow;
         return;
       }
 
-      data.leaderboard.forEach((p, idx) => {
-        const tr = document.createElement('tr');
-        const rankMedal = idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `#${idx + 1}`;
-        tr.innerHTML = `
-          <td><strong>${rankMedal}</strong></td>
-          <td>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="width:24px;height:24px;">${renderAvatarSvg(p.avatar, 24)}</div>
-              <strong>${this.escapeHtml(p.player_name)}</strong>
-            </div>
-          </td>
-          <td><strong style="color:var(--accent-cyan);">${p.total_score} pts</strong></td>
-          <td>${p.matches_played}</td>
-          <td><span style="color:var(--accent-emerald);font-weight:700;">${p.matches_won}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
+      const buildRows = () => {
+        return data.leaderboard.map((p, idx) => {
+          const tr = document.createElement('tr');
+          const rankMedal = idx === 0 ? '1st' : idx === 1 ? '2nd' : idx === 2 ? '3rd' : `#${idx + 1}`;
+          tr.innerHTML = `
+            <td><strong>${rankMedal}</strong></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:24px;height:24px;">${renderAvatarSvg(p.avatar, 24)}</div>
+                <strong>${this.escapeHtml(p.player_name)}</strong>
+              </div>
+            </td>
+            <td><strong style="color:var(--accent-cyan);">${p.total_score} pts</strong></td>
+            <td>${p.matches_played}</td>
+            <td><span style="color:var(--accent-emerald);font-weight:700;">${p.matches_won}</span></td>
+          `;
+          return tr;
+        });
+      };
+
+      if (tbody) buildRows().forEach(tr => tbody.appendChild(tr));
+      if (settingsTbody) buildRows().forEach(tr => settingsTbody.appendChild(tr));
     } catch (e) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--accent-rose);">Failed to load all-time ranks: ${e.message}</td></tr>`;
+      const errRow = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--accent-rose);">Failed to load all-time ranks: ${e.message}</td></tr>`;
+      if (tbody) tbody.innerHTML = errRow;
+      if (settingsTbody) settingsTbody.innerHTML = errRow;
     }
   }
 
@@ -1375,6 +1578,12 @@ class ScribbleApp {
   switchScreen(screenId) {
     document.querySelectorAll('.view-screen').forEach(s => s.classList.remove('active-screen'));
     document.getElementById(screenId)?.classList.add('active-screen');
+    if (screenId === 'gameScreen') {
+      document.getElementById('mobileTabChatBtn')?.classList.add('active');
+      document.getElementById('mobileTabLeaderboardBtn')?.classList.remove('active');
+      document.getElementById('chatPanel')?.classList.remove('mobile-hidden');
+      document.getElementById('leaderboardPanel')?.classList.add('mobile-hidden');
+    }
   }
 
   // --- JOIN FLOWS ---
@@ -1382,7 +1591,7 @@ class ScribbleApp {
   joinAsPlayer() {
     if (!this.socket || !this.socket.connected) {
       this.showServerNoticeBanner('Server offline: Please check your game server connection.');
-      return alert('Not connected to the game server!\nPlease ensure the game server is running.');
+      return this.showUiAlert('Not connected to the game server!\nPlease ensure the game server is running.', 'Connection Error', 'error');
     }
 
     const roomCode = document.getElementById('playerRoomCode')?.value.trim().toUpperCase();
@@ -1390,7 +1599,7 @@ class ScribbleApp {
     const teamInput = document.querySelector('input[name="playerTeam"]:checked')?.value || 'auto';
 
     if (!roomCode || roomCode.length < 4) {
-      return alert('Please enter a valid 6-character Room Code');
+      return this.showUiAlert('Please enter a valid 6-character Room Code', 'Invalid Room Code', 'warning');
     }
 
     this.socket.emit('join_room', {
@@ -1401,7 +1610,7 @@ class ScribbleApp {
       team: teamInput === 'auto' ? null : teamInput
     }, (res) => {
       if (!res?.success) {
-        return alert(res?.error || 'Could not join room');
+        return this.showUiAlert(res?.error || 'Could not join room', 'Join Failed', 'error');
       }
       this.currentRole = 'player';
       this.roomCode = roomCode;
@@ -1421,7 +1630,7 @@ class ScribbleApp {
     const privateChat = chatMode === 'private';
 
     if (wordMode === 'custom' && !wordsRaw.trim()) {
-      return alert('Please enter your custom words in the box, or select "Random Words (Automatic)".');
+      return this.showUiAlert('Please enter your custom words in the box, or select "Random Words (Automatic)".', 'Custom Words Required', 'warning');
     }
 
     try {
@@ -1441,20 +1650,20 @@ class ScribbleApp {
       });
       const data = await res.json();
       if (!data.success) {
-        return alert('Failed to create room: ' + data.error);
+        return this.showUiAlert('Failed to create room: ' + data.error, 'Room Creation Failed', 'error');
       }
 
       this.joinAsAdmin(data.roomCode, data.adminKey);
     } catch (err) {
       this.showServerNoticeBanner('Backend error: Could not reach game server.');
-      alert('Error creating room: ' + err.message);
+      this.showUiAlert('Error creating room: ' + err.message, 'Server Error', 'error');
     }
   }
 
   joinAsAdmin(roomCode, adminKey) {
     if (!this.socket || !this.socket.connected) {
       this.showServerNoticeBanner('Server offline: Could not connect to game server.');
-      return alert('Not connected to the game server!\nPlease ensure the game server is running.');
+      return this.showUiAlert('Not connected to the game server!\nPlease ensure the game server is running.', 'Connection Error', 'error');
     }
 
     const cleanCode = roomCode.toUpperCase().trim();
@@ -1465,7 +1674,7 @@ class ScribbleApp {
       adminKey: adminKey
     }, (res) => {
       if (!res?.success) {
-        return alert(res?.error || 'Invalid Admin Credentials');
+        return this.showUiAlert(res?.error || 'Invalid Admin Credentials', 'Access Denied', 'error');
       }
       this.currentRole = 'admin';
       this.roomCode = cleanCode;
@@ -1482,7 +1691,7 @@ class ScribbleApp {
   joinAsArena(roomCode) {
     if (!this.socket || !this.socket.connected) {
       this.showServerNoticeBanner('Server offline: Could not connect to game server.');
-      return alert('Not connected to the game server!\nPlease ensure the game server is running.');
+      return this.showUiAlert('Not connected to the game server!\nPlease ensure the game server is running.', 'Connection Error', 'error');
     }
 
     const cleanCode = roomCode.toUpperCase().trim();
@@ -1492,7 +1701,7 @@ class ScribbleApp {
       name: 'Arena Display'
     }, (res) => {
       if (!res?.success) {
-        return alert(res?.error || 'Could not connect Arena Display');
+        return this.showUiAlert(res?.error || 'Could not connect Arena Display', 'Connection Failed', 'error');
       }
       this.currentRole = 'arena';
       this.roomCode = cleanCode;
@@ -1572,19 +1781,12 @@ class ScribbleApp {
       });
     });
 
-    // Clear
-    document.getElementById('toolClear')?.addEventListener('click', () => {
-      if (confirm('Clear the entire canvas?')) {
+    // Clear canvas
+    document.getElementById('toolClear')?.addEventListener('click', async () => {
+      const ok = await this.showUiConfirm('Clear the entire canvas? All drawings will be reset.', 'Clear Canvas', { confirmText: 'Clear Canvas', isDanger: true });
+      if (ok) {
         this.drawingBoard.clear();
       }
-    });
-
-    // Bomb Erase
-    document.getElementById('toolBomb')?.addEventListener('click', () => {
-      this.socket.emit('trigger_powerup', {
-        roomCode: this.roomCode,
-        powerup: 'bomb'
-      });
     });
 
     // Brush size dots
@@ -2169,8 +2371,9 @@ class ScribbleApp {
       });
 
       // Kick
-      tr.querySelector('[data-kick]')?.addEventListener('click', () => {
-        if (confirm(`Kick ${p.name}?`)) {
+      tr.querySelector('[data-kick]')?.addEventListener('click', async () => {
+        const ok = await this.showUiConfirm(`Are you sure you want to kick ${p.name}?`, 'Kick Player', { confirmText: 'Kick Player', isDanger: true });
+        if (ok) {
           this.socket.emit('admin_kick', {
             roomCode: this.roomCode,
             adminKey: this.adminKey,
@@ -2610,7 +2813,7 @@ class ScribbleApp {
       // If user cancelled display media or on unsupported context, capture Arena Canvas stream
       if (!stream) {
         const canvas = document.getElementById('arenaCanvas');
-        if (!canvas) return alert('Arena canvas not found for recording');
+        if (!canvas) return this.showUiAlert('Arena canvas not found for recording', 'Recording Error', 'error');
         stream = canvas.captureStream(30);
       }
 
@@ -2661,7 +2864,7 @@ class ScribbleApp {
       soundEngine?.playCue('turn_start');
     } catch (err) {
       console.error('[Record] Error starting recording:', err);
-      alert('Could not start recording session: ' + err.message);
+      this.showUiAlert('Could not start recording session: ' + err.message, 'Recording Error', 'error');
     }
   }
 

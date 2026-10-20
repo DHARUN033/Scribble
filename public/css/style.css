@@ -1609,7 +1609,28 @@ body {
 .admin-quick-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.admin-quick-actions button {
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 11px;
+  font-size: 0.80rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.admin-quick-actions button svg {
+  flex-shrink: 0;
 }
 
 .btn-chat-private-active {
@@ -2822,49 +2843,398 @@ body {
   }
 }
 
-/* Responsive Breakpoints */
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (DESKTOP, TABLET & MOBILE)
+   ========================================================================== */
+.mobile-game-tabs {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  #leaderboardPanel.mobile-hidden,
+  #chatPanel.mobile-hidden {
+    display: flex !important;
+  }
+}
+
 @media (max-width: 1024px) {
   .game-stage-grid {
-    grid-template-columns: 200px 1fr 260px;
+    grid-template-columns: 210px 1fr 270px;
+    gap: 12px;
   }
 
   .arena-broadcast-grid {
     grid-template-columns: 1fr;
   }
+
+  .admin-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px 20px;
+  }
+
+  .admin-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .admin-quick-actions button {
+    width: 100%;
+    height: 42px;
+    padding: 0 10px;
+    font-size: 0.82rem;
+  }
 }
 
 @media (max-width: 768px) {
-  #gameScreen {
-    height: calc(100vh - 64px);
-    min-height: 0;
-    overflow: hidden;
+  /* Global App Header */
+  .app-header {
+    height: 56px;
+    padding: 0 12px;
+  }
+
+  .header-left {
+    gap: 8px;
+  }
+
+  .brand-logo {
+    font-size: 1.15rem;
+    gap: 6px;
+  }
+
+  .brand-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .room-badge-container {
+    padding: 3px 8px;
+    gap: 4px;
+  }
+
+  .room-code-tag {
+    font-size: 0.78rem;
+  }
+
+  .room-code-tag strong {
+    letter-spacing: 1px;
+  }
+
+  .btn-settings-header {
+    padding: 5px 10px;
+    font-size: 0.78rem;
+    gap: 4px;
+  }
+
+  .role-pill {
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+  }
+
+  /* View 1: Lobby Screen */
+  #lobbyScreen {
+    padding: 16px 10px;
+  }
+
+  .lobby-card {
+    padding: 20px 14px;
+    max-width: 100%;
+  }
+
+  .lobby-tabs {
+    gap: 4px;
+    margin-bottom: 18px;
+    padding: 3px;
+  }
+
+  .lobby-tab-btn {
+    font-size: 0.8rem;
+    padding: 8px 6px;
+    gap: 4px;
+  }
+
+  .lobby-tab-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .tab-title {
+    font-size: 1.35rem;
+  }
+
+  .tab-desc {
+    font-size: 0.85rem;
+    margin-bottom: 18px;
   }
 
   .lobby-form-grid {
     grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .avatar-builder-section {
+    width: 100%;
+  }
+
+  .avatar-preview-box {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+  }
+
+  .avatar-controls-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+
+  .avatar-controls-grid button {
+    padding: 7px 3px;
+    font-size: 0.7rem;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .team-selector-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .team-radio {
+    width: 100%;
+  }
+
+  .team-badge {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 12px;
+  }
+
+  /* View 2: Gameplay Screen */
+  #gameScreen {
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    padding: 10px 8px;
+    gap: 10px;
+  }
+
+  .game-top-bar {
+    padding: 8px 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-radius: var(--radius-sm);
+  }
+
+  .round-hud .hud-label,
+  .drawer-hud .hud-label {
+    display: none;
+  }
+
+  .round-hud .hud-value {
+    font-size: 1rem;
+  }
+
+  .timer-circle-wrap {
+    width: 40px;
+    height: 40px;
+  }
+
+  .timer-number {
+    font-size: 0.92rem;
+  }
+
+  .word-blanks-display {
+    font-size: 1.3rem;
+    letter-spacing: 4px;
+  }
+
+  .word-status-notice {
+    font-size: 0.78rem;
+  }
+
+  .drawer-chip {
+    padding: 2px 8px;
+    gap: 6px;
+  }
+
+  .drawer-name {
+    font-size: 0.82rem;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .game-stage-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(130px, 0.9fr) minmax(0, 2.2fr) minmax(150px, 1.1fr);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: auto;
+    overflow: visible;
+  }
+
+  .canvas-center-stage {
+    order: 1;
+    width: 100%;
+    gap: 8px;
   }
 
   .canvas-viewport {
     min-height: 220px;
-    max-height: none;
+    max-height: 46vh;
+    aspect-ratio: 4 / 3;
+    width: 100%;
   }
 
-  .leaderboard-list,
-  .chat-messages-container {
-    min-height: 0;
+  .mobile-game-tabs {
+    display: flex;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 4px;
   }
 
-  .admin-grid {
-    grid-template-columns: 1fr;
+  .mobile-game-tab-btn {
+    flex: 1;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-main);
+    font-size: 0.82rem;
+    font-weight: 700;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .mobile-game-tab-btn.active {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(168, 85, 247, 0.25));
+    color: #fff;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  #chatPanel {
+    order: 2;
+    width: 100%;
+    height: 320px;
+    max-height: 46vh;
+  }
+
+  #leaderboardPanel {
+    order: 2;
+    width: 100%;
+    max-height: 46vh;
+  }
+
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  .drawer-toolbar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .tool-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .color-palette-group {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    max-width: 100%;
   }
 
   .word-choices-row {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* View 3: Admin Screen */
+  #adminScreen {
+    padding: 12px 8px;
+  }
+
+  .admin-dashboard-container {
+    gap: 12px;
+  }
+
+  .admin-header {
+    padding: 14px 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-meta h2 {
+    font-size: 1.15rem;
+    gap: 6px;
+  }
+
+  .admin-meta h2 svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .admin-badges {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .admin-badges .badge {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+  }
+
+  .admin-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .admin-quick-actions button {
+    height: 42px;
+    font-size: 0.78rem;
+    padding: 0 8px;
+    width: 100%;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .admin-card {
+    padding: 16px 12px;
+    gap: 12px;
+  }
+
+  .admin-players-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table {
+    min-width: 440px;
   }
 }
 
@@ -4698,9 +5068,242 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .settings-card {
+    padding: 20px 14px;
+    width: min(680px, calc(100vw - 16px));
+    max-height: calc(100vh - 24px);
+    border-radius: var(--radius-md);
+  }
+
+  .settings-header {
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+  }
+
+  .settings-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+  }
+
+  .settings-header-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .settings-header-text h2 {
+    font-size: 1.15rem;
+  }
+
+  .settings-header-text p {
+    font-size: 0.78rem;
+  }
+
+  .settings-nav-tabs {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    margin-bottom: 16px !important;
+    padding: 4px !important;
+  }
+
+  .settings-tab-btn {
+    font-size: 0.78rem !important;
+    padding: 8px 6px !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+  }
+
+  .settings-section {
+    padding: 14px 12px;
+    margin-bottom: 12px;
+  }
+
+  .settings-section h3 {
+    font-size: 0.95rem;
+  }
+
+  .settings-desc {
+    font-size: 0.78rem;
+    margin-bottom: 10px;
+  }
+
   .settings-chat-options-grid,
   .settings-audio-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
+
+  .settings-button-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .example-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+  }
+
+  .scoring-example-table {
+    min-width: 520px;
+    font-size: 0.76rem;
+  }
+}
+
+/* ==========================================================================
+   IN-APP UI POPUP DIALOGS & FLOATING TOASTS (Replaces browser alert/confirm)
+   ========================================================================== */
+.ui-dialog-card {
+  width: 90%;
+  max-width: 440px;
+  padding: 28px 24px;
+  text-align: center;
+  position: relative;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(6, 182, 212, 0.15);
+  animation: fadeInScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ui-dialog-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.ui-dialog-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 8px;
+  letter-spacing: -0.2px;
+}
+
+.ui-dialog-message {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0 0 24px;
+  white-space: pre-line;
+}
+
+.ui-dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.ui-dialog-actions button {
+  flex: 1;
+  padding: 11px 18px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Floating Toast Notifications */
+.ui-toast-container {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10001;
+  pointer-events: none;
+}
+
+.ui-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(6, 182, 212, 0.2);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(-16px) scale(0.95);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(14px);
+}
+
+.ui-toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.ui-toast-icon {
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-toast-success {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(16, 185, 129, 0.25);
+}
+
+.ui-toast-success .ui-toast-icon {
+  color: #10b981;
+}
+
+.ui-toast-warning {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.25);
+}
+
+.ui-toast-warning .ui-toast-icon {
+  color: #f59e0b;
+}
+
+.ui-toast-error {
+  border-color: rgba(244, 63, 94, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(244, 63, 94, 0.25);
+}
+
+.ui-toast-error .ui-toast-icon {
+  color: #f43f5e;
+}
+
+/* Admin Screen Alignment & Spacing Improvements */
+.admin-dashboard-container {
+  gap: 16px;
+}
+
+.admin-header {
+  padding: 16px 24px;
+}
+
+.admin-grid {
+  align-items: stretch;
+}
+
+.admin-grid > .admin-card {
+  height: 100%;
+}
+
+.admin-config-summary-card {
+  margin-top: auto;
 }
